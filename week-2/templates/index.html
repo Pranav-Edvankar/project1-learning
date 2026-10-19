@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    
+    <!-- Google Fonts: Doto (Nothing NDOT display), Space Grotesk & Inter (Nothing Sans), JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Doto:wght@600;800;900&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Markdown Parser -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <style>
+        :root {
+            --bg-canvas: #090909;
+            --bg-elevated: #141414;
+            --bg-surface: #1c1c1c;
+            --bg-user-bubble: #1f1f1f;
+            --bg-input: rgba(18, 18, 18, 0.92);
+            
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --border-medium: rgba(255, 255, 255, 0.15);
+            --border-dashed: rgba(255, 255, 255, 0.14);
+            
+            --text-primary: #ededed;
+            --text-secondary: #909090;
+            --text-tertiary: #585858;
+            
+            --nothing-red: #eb0028;
+            --nothing-red-glow: rgba(235, 0, 40, 0.35);
+            
+            --font-ndot: 'Doto', monospace, sans-serif;
+            --font-sans: 'Space Grotesk', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', Menlo, monospace;
+            
+            --column-width: 720px;
+            --radius-pill: 9999px;
+            --radius-bubble: 20px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+            background-color: var(--bg-canvas);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Subtle, refined Nothing dot texture — barely there, calm and premium */
+        body {
+            background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+            background-size: 24px 24px;
+            position: relative;
+        }
+
+        /* Clean Scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: var(--radius-pill);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.22);
+        }
+
+        /* -------------------------------------------------------------
+           HEADER: CALM NOTHING OS BRAND BAR
+           ------------------------------------------------------------- */
+        header.app-header {
+            height: 54px;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(9, 9, 9, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-subtle);
+            flex-shrink: 0;
+            z-index: 50;
+        }
+
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            user-select: none;
+        }
+
+        .brand-logo {
+            font-family: var(--font-ndot);
+            font-size: 1.1rem;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .red-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--nothing-red);
+            box-shadow: 0 0 6px var(--nothing-red-glow);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Humane Pill Buttons */
+        .pill-btn {
+            font-family: var(--font-sans);
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            background: transparent;
+            border: 1px solid var(--border-subtle);
+            padding: 6px 14px;
+            border-radius: var(--radius-pill);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            user-select: none;
+            outline: none;
+        }
+
+        .pill-btn:hover {
+            color: var(--text-primary);
+            border-color: var(--border-medium);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .pill-btn:active {
+            transform: scale(0.97);
+        }
+
+        /* Model Dropdown */
+        .model-select-wrapper {
+            position: relative;
+        }
+
+        .model-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 4px;
+            min-width: 210px;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+            display: none;
+            flex-direction: column;
+            gap: 2px;
+            z-index: 100;
+        }
+
+        .model-dropdown.show {
+            display: flex;
+        }
+
+        .model-dropdown-item {
+            padding: 8px 12px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            cursor: pointer;
+            transition: background 0.12s ease;
+            background: transparent;
+            border: none;
+            text-align: left;
+            width: 100%;
+        }
+
+        .model-dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .model-dropdown-item.active {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .model-item-title {
+            font-family: var(--font-sans);
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .model-item-desc {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+        }
+
+        /* -------------------------------------------------------------
+           CHAT CANVAS: CENTERED, FOCUSED & HUMAN
+           ------------------------------------------------------------- */
+        .chat-viewport {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 28px 20px 140px;
+            scroll-behavior: smooth;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: var(--column-width);
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            margin: 14vh auto 0;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            max-width: 520px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .empty-greeting {
+            font-family: var(--font-ndot);
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            color: var(--text-primary);
+        }
+
+        .empty-caption {
+            font-size: 0.94rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .suggestion-list {
+            margin-top: 14px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .suggestion-chip {
+            background: transparent;
+            border: 1px dashed var(--border-dashed);
+            color: var(--text-secondary);
+            font-family: var(--font-sans);
+            font-size: 0.82rem;
+            font-weight: 400;
+            padding: 8px 16px;
+            border-radius: var(--radius-pill);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            outline: none;
+            user-select: none;
+        }
+
+        .suggestion-chip:hover {
+            color: var(--text-primary);
+            border-color: var(--border-medium);
+            background: rgba(255, 255, 255, 0.04);
+            transform: translateY(-1px);
+        }
+
+        /* -------------------------------------------------------------
+           MESSAGES: REFINED PROSE & CALM BUBBLES
+           ------------------------------------------------------------- */
+        .message-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            animation: fadeIn 0.25s ease;
+            width: 100%;
+        }
+
+        .message-group.user {
+            align-items: flex-end;
+        }
+
+        .message-group.assistant {
+            align-items: flex-start;
+        }
+
+        /* User Message Bubble: Sleek dark matte squircle */
+        .user-bubble {
+            background: var(--bg-user-bubble);
+            color: var(--text-primary);
+            border: 1px solid var(--border-subtle);
+            font-weight: 400;
+            padding: 12px 18px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            line-height: 1.55;
+            max-width: 82%;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        /* Assistant Message: Clean, human prose */
+        .assistant-message {
+            width: 100%;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: #dedede;
+            word-wrap: break-word;
+        }
+
+        .assistant-message p {
+            margin-bottom: 14px;
+        }
+        .assistant-message p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Human Headings in Clean Geometric Sans */
+        .assistant-message h1,
+        .assistant-message h2,
+        .assistant-message h3,
+        .assistant-message h4 {
+            font-family: var(--font-sans);
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            color: #ffffff;
+            margin: 22px 0 10px;
+        }
+
+        .assistant-message h1 { font-size: 1.35rem; }
+        .assistant-message h2 { font-size: 1.18rem; }
+        .assistant-message h3 { font-size: 1.02rem; }
+
+        .assistant-message ul,
+        .assistant-message ol {
+            margin-left: 20px;
+            margin-bottom: 14px;
+        }
+
+        .assistant-message li {
+            margin-bottom: 6px;
+        }
+
+        .assistant-message code {
+            font-family: var(--font-mono);
+            font-size: 0.86em;
+            background: rgba(255, 255, 255, 0.07);
+            padding: 2px 5px;
+            border-radius: 4px;
+            color: #f0f0f0;
+        }
+
+        .assistant-message blockquote {
+            border-left: 2px solid var(--border-medium);
+            padding-left: 14px;
+            margin: 14px 0;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .assistant-message hr {
+            border: none;
+            border-top: 1px dashed var(--border-dashed);
+            margin: 22px 0;
+        }
+
+        /* Clean Table */
+        .assistant-message table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.88rem;
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            background: rgba(14, 14, 14, 0.6);
+            overflow: hidden;
+        }
+
+        .assistant-message th {
+            font-family: var(--font-sans);
+            font-size: 0.82rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 10px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-subtle);
+            border-right: 1px solid var(--border-subtle);
+            color: #ffffff;
+        }
+
+        .assistant-message td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border-subtle);
+            border-right: 1px solid var(--border-subtle);
+            color: #cfcfcf;
+        }
+
+        .assistant-message tr:last-child td {
+            border-bottom: none;
+        }
+        .assistant-message td:last-child,
+        .assistant-message th:last-child {
+            border-right: none;
+        }
+
+        /* Clean Code Blocks */
+        .code-container {
+            margin: 16px 0;
+            background: #0f0f0f;
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 14px;
+            background: #141414;
+            border-bottom: 1px solid var(--border-subtle);
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .code-copy-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-family: var(--font-sans);
+            font-size: 0.74rem;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px;
+            transition: color 0.15s ease;
+        }
+
+        .code-copy-btn:hover {
+            color: #ffffff;
+        }
+
+        .code-container pre {
+            padding: 14px;
+            overflow-x: auto;
+            font-family: var(--font-mono);
+            font-size: 0.84rem;
+            line-height: 1.55;
+            color: #e5e5e5;
+        }
+
+        /* Error Message */
+        .error-message {
+            background: rgba(235, 0, 40, 0.08);
+            border: 1px solid rgba(235, 0, 40, 0.3);
+            color: #ff8e99;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 0.88rem;
+            width: 100%;
+        }
+
+        /* Gentle Typing Indicator */
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 0;
+        }
+
+        .typing-indicator.active {
+            display: flex;
+        }
+
+        .typing-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--text-tertiary);
+            animation: gentlePulse 1.3s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes gentlePulse {
+            0%, 80%, 100% {
+                transform: scale(0.7);
+                opacity: 0.35;
+            }
+            40% {
+                transform: scale(1.1);
+                opacity: 0.95;
+                background: var(--nothing-red);
+            }
+        }
+
+        /* -------------------------------------------------------------
+           INPUT STATION: NOTHING OS FLOATING CAPSULE DOCK
+           ------------------------------------------------------------- */
+        .dock-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            padding: 12px 20px 20px;
+            background: linear-gradient(to top, var(--bg-canvas) 75%, transparent);
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .input-box {
+            width: 100%;
+            max-width: var(--column-width);
+            background: var(--bg-input);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-pill);
+            padding: 8px 10px 8px 20px;
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+            transition: all 0.2s ease;
+            pointer-events: auto;
+        }
+
+        .input-box:focus-within {
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.7);
+            background: rgba(22, 22, 22, 0.96);
+        }
+
+        .message-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            max-height: 150px;
+            resize: none;
+            padding: 7px 0;
+        }
+
+        .message-input::placeholder {
+            color: var(--text-tertiary);
+            font-family: var(--font-sans);
+            font-size: 0.9rem;
+        }
+
+        /* Dispatch Button: Nothing Red Circle with Arrow */
+        .dispatch-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--nothing-red);
+            border: none;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            outline: none;
+            flex-shrink: 0;
+            box-shadow: 0 0 10px var(--nothing-red-glow);
+        }
+
+        .dispatch-btn:hover {
+            transform: scale(1.05);
+            background: #ff1c3e;
+            box-shadow: 0 0 16px rgba(235, 0, 40, 0.5);
+        }
+
+        .dispatch-btn:active {
+            transform: scale(0.94);
+        }
+
+        .dispatch-btn:disabled {
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: none;
+            color: var(--text-tertiary);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .dispatch-btn svg {
+            width: 15px;
+            height: 15px;
+            stroke: currentColor;
+            stroke-width: 2.2;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* -------------------------------------------------------------
+           RESPONSIVE
+           ------------------------------------------------------------- */
+        @media (max-width: 768px) {
+            .chat-viewport {
+                padding: 16px 14px 120px;
+            }
+            .dock-bar {
+                padding: 10px 14px 16px;
+            }
+            .empty-greeting {
+                font-size: 1.35rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HUMANE NOTHING OS HEADER -->
+    <header class="app-header">
+        <div class="brand-container">
+            <div class="brand-logo">
+                <span>( CHAT )</span>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            <!-- Discreet Model Selector Pill -->
+            <div class="model-select-wrapper">
+                <button class="pill-btn" id="modelSelectBtn" onclick="toggleModelDropdown()">
+                    <span id="currentModelLabel">GPT-120B</span>
+                    <span style="font-size: 0.7rem; opacity: 0.7;">▾</span>
+                </button>
+                <div class="model-dropdown" id="modelDropdown">
+                    <button class="model-dropdown-item active" onclick="selectModel('openai/gpt-oss-120b', 'GPT-120B')">
+                        <span class="model-item-title">GPT-120B</span>
+                        <span class="model-item-desc">Flagship reasoning and analysis</span>
+                    </button>
+                    <button class="model-dropdown-item" onclick="selectModel('openai/gpt-oss-20b', 'GPT-20B')">
+                        <span class="model-item-title">GPT-20B</span>
+                        <span class="model-item-desc">Fast, low-latency responses</span>
+                    </button>
+                    <button class="model-dropdown-item" onclick="selectModel('qwen/qwen3.8-27b', 'Qwen-27B')">
+                        <span class="model-item-title">Qwen-27B</span>
+                        <span class="model-item-desc">Balanced multitask model</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- New Chat Pill -->
+            <button class="pill-btn" onclick="clearChat()" title="Start a fresh conversation">
+                <span>+ New chat</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CHAT CANVAS -->
+    <main class="chat-viewport" id="chatViewport">
+        <div class="chat-container" id="chatContainer">
+            
+            <!-- Empty State -->
+            <div class="empty-state" id="emptyState">
+                <div class="empty-greeting">( HELLO )</div>
+                <div class="empty-caption">What would you like to explore today?</div>
+                <div class="suggestion-list" id="suggestionList"></div>
+            </div>
+
+        </div>
+
+        <!-- Gentle Typing Indicator -->
+        <div class="chat-container">
+            <div class="typing-indicator" id="typingIndicator">
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+            </div>
+        </div>
+    </main>
+
+    <!-- FLOATING DOCK -->
+    <div class="dock-bar">
+        <div class="input-box">
+            <textarea 
+                id="messageInput" 
+                class="message-input" 
+                rows="1" 
+                placeholder="Ask anything..." 
+                onkeydown="handleKey(event)"
+                oninput="handleInputResize(this)"></textarea>
+            
+            <button class="dispatch-btn" id="sendBtn" onclick="sendMessage()" title="Send">
+                <svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        let currentModel = "openai/gpt-oss-120b";
+        let hasMessages = false;
+
+        // Model dropdown toggling
+        function toggleModelDropdown() {
+            const dropdown = document.getElementById("modelDropdown");
+            dropdown.classList.toggle("show");
+        }
+
+        function selectModel(modelId, label) {
+            currentModel = modelId;
+            document.getElementById("currentModelLabel").innerText = label;
+            document.querySelectorAll(".model-dropdown-item").forEach(item => {
+                item.classList.toggle("active", item.innerText.includes(label));
+            });
+            document.getElementById("modelDropdown").classList.remove("show");
+        }
+
+        // Close dropdown when clicking outside
+        window.addEventListener("click", (e) => {
+            if (!e.target.closest(".model-select-wrapper")) {
+                document.getElementById("modelDropdown").classList.remove("show");
+            }
+        });
+
+        // Textarea auto-resize
+        function handleInputResize(textarea) {
+            textarea.style.height = "auto";
+            textarea.style.height = Math.min(textarea.scrollHeight, 150) + "px";
+        }
+
+        function handleKey(e) {
+            if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function applySuggestion(text) {
+            const input = document.getElementById("messageInput");
+            input.value = text;
+            handleInputResize(input);
+            sendMessage();
+        }
+
+        // Format Markdown using marked.js with human-readable styling
+        function formatMarkdown(text) {
+            if (!text) return "";
+            if (typeof marked !== "undefined" && marked.parse) {
+                try {
+                    const renderer = new marked.Renderer();
+                    renderer.code = function(code, lang) {
+                        const codeContent = typeof code === 'object' ? code.text : code;
+                        const language = (typeof code === 'object' ? code.lang : lang) || "code";
+                        const escaped = escapeHtml(codeContent);
+                        return `
+                            <div class="code-container">
+                                <div class="code-header">
+                                    <span>${escapeHtml(language.toLowerCase())}</span>
+                                    <button class="code-copy-btn" onclick="copyCode(this)">Copy</button>
+                                </div>
+                                <pre><code>${escaped}</code></pre>
+                            </div>
+                        `;
+                    };
+                    return marked.parse(text, { renderer: renderer, gfm: true, breaks: true });
+                } catch (e) {
+                    console.error("Marked parsing error:", e);
+                }
+            }
+            return escapeHtml(text).replace(/\n/g, '<br>');
+        }
+
+        function escapeHtml(text) {
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        function copyCode(btn) {
+            const pre = btn.closest(".code-container").querySelector("pre code");
+            navigator.clipboard.writeText(pre.innerText).then(() => {
+                btn.innerText = "Copied";
+                setTimeout(() => { btn.innerText = "Copy"; }, 2000);
+            });
+        }
+
+        // Append message
+        function appendUserMessage(text) {
+            const container = document.getElementById("chatContainer");
+            const emptyState = document.getElementById("emptyState");
+            if (emptyState) emptyState.style.display = "none";
+            hasMessages = true;
+
+            const group = document.createElement("div");
+            group.className = "message-group user";
+
+            const bubble = document.createElement("div");
+            bubble.className = "user-bubble";
+            bubble.innerText = text;
+
+            group.appendChild(bubble);
+            container.appendChild(group);
+            scrollToBottom();
+        }
+
+        function appendAssistantMessage(text) {
+            const container = document.getElementById("chatContainer");
+            const group = document.createElement("div");
+            group.className = "message-group assistant";
+
+            const messageBody = document.createElement("div");
+            messageBody.className = "assistant-message";
+            messageBody.innerHTML = formatMarkdown(text);
+
+            group.appendChild(messageBody);
+            container.appendChild(group);
+            scrollToBottom();
+        }
+
+        function appendErrorMessage(text) {
+            const container = document.getElementById("chatContainer");
+            const group = document.createElement("div");
+            group.className = "message-group assistant";
+
+            const err = document.createElement("div");
+            err.className = "error-message";
+            err.innerText = text;
+
+            group.appendChild(err);
+            container.appendChild(group);
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            const viewport = document.getElementById("chatViewport");
+            viewport.scrollTop = viewport.scrollHeight;
+        }
+
+        // Send Message
+        async function sendMessage() {
+            const input = document.getElementById("messageInput");
+            const sendBtn = document.getElementById("sendBtn");
+            const typing = document.getElementById("typingIndicator");
+            const text = input.value.trim();
+
+            if (!text) return;
+
+            appendUserMessage(text);
+            input.value = "";
+            input.style.height = "auto";
+            sendBtn.disabled = true;
+            typing.classList.add("active");
+            scrollToBottom();
+
+            try {
+                const response = await fetch("/api/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        message: text,
+                        model: currentModel
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    appendAssistantMessage(data.reply);
+                } else {
+                    appendErrorMessage(data.error || "Unable to receive response from server.");
+                }
+            } catch (err) {
+                appendErrorMessage("Connection error: Ensure server is running on http://127.0.0.1:5000.");
+            } finally {
+                sendBtn.disabled = false;
+                typing.classList.remove("active");
+                input.focus();
+                scrollToBottom();
+            }
+        }
+
+        // Curated pool of simple, diverse, everyday topics
+        const SIMPLE_SUGGESTIONS = [
+            { label: "Why is the sky blue?", prompt: "Why is the sky blue during the day and red at sunset?" },
+            { label: "15-minute dinner idea", prompt: "Give me 2 quick, delicious dinner ideas that take under 15 minutes to make." },
+            { label: "How caffeine wakes us up", prompt: "How does caffeine affect the human brain and wake us up?" },
+            { label: "Tips for better sleep", prompt: "What are 3 simple, science-backed habits to get better sleep tonight?" },
+            { label: "Explain quantum computing simply", prompt: "Explain quantum computing in simple terms using an everyday analogy." },
+            { label: "Draft a polite decline email", prompt: "Draft a short, polite email declining a meeting invite." },
+            { label: "How do airplanes fly?", prompt: "How do airplanes generate lift and stay in the air?" },
+            { label: "5-minute morning stretches", prompt: "Give me a gentle 5-minute morning stretching routine." },
+            { label: "Why leaves change color", prompt: "Why do leaves change color in autumn?" },
+            { label: "Recommend a great book", prompt: "Recommend a captivating fiction book and explain why it is worth reading." },
+            { label: "Surprising ocean fact", prompt: "Tell me a surprising and fascinating fact about the deep ocean." },
+            { label: "Write a haiku about rain", prompt: "Write a calm, vivid haiku about a rainy afternoon." },
+            { label: "How memory works", prompt: "How does the human brain store and retrieve memories?" },
+            { label: "Healthy 2-minute snack", prompt: "Suggest 3 easy and healthy snacks I can prepare in two minutes." },
+            { label: "How noise cancellation works", prompt: "How do active noise-canceling headphones actually work?" },
+            { label: "Simple ways to reduce stress", prompt: "What are a few simple, actionable techniques to calm down when stressed?" },
+            { label: "Why do we dream?", prompt: "Why do humans dream and what purpose does dreaming serve?" },
+            { label: "Plan a relaxing weekend", prompt: "Give me an idea for a calm, low-stress weekend itinerary." },
+            { label: "Fun science riddle", prompt: "Give me a fun, clever science riddle with the answer hidden." }
+        ];
+
+        let lastSuggestedLabels = new Set();
+
+        // Render 3 distinct random suggestions without immediate repetition
+        function renderRandomSuggestions() {
+            const list = document.getElementById("suggestionList");
+            if (!list) return;
+
+            // Prefer suggestions not shown in the immediate previous set
+            let candidates = SIMPLE_SUGGESTIONS.filter(item => !lastSuggestedLabels.has(item.label));
+            if (candidates.length < 3) {
+                candidates = [...SIMPLE_SUGGESTIONS];
+            }
+
+            // Fisher-Yates shuffle
+            for (let i = candidates.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+            }
+
+            const selected = candidates.slice(0, 3);
+            lastSuggestedLabels = new Set(selected.map(item => item.label));
+
+            list.innerHTML = "";
+            selected.forEach(item => {
+                const btn = document.createElement("button");
+                btn.className = "suggestion-chip";
+                btn.textContent = item.label;
+                btn.onclick = () => applySuggestion(item.prompt);
+                list.appendChild(btn);
+            });
+        }
+
+        // New Chat
+        function clearChat() {
+            const container = document.getElementById("chatContainer");
+            container.innerHTML = `
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-greeting">( HELLO )</div>
+                    <div class="empty-caption">What would you like to explore today?</div>
+                    <div class="suggestion-list" id="suggestionList"></div>
+                </div>
+            `;
+            hasMessages = false;
+            renderRandomSuggestions();
+            document.getElementById("messageInput").value = "";
+            document.getElementById("messageInput").style.height = "auto";
+            document.getElementById("messageInput").focus();
+        }
+
+        // Populate initial random simple suggestions
+        renderRandomSuggestions();
+    </script>
+</body>
+</html>
