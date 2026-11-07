@@ -881,7 +881,20 @@
     <script>
         let currentProvider = "groq";
         let currentModel = "";
-        let systemStatus = {};
+        let systemStatus = {
+            groq: {
+                connection: { status: "online", latency_ms: null },
+                models: [
+                    "openai/gpt-oss-120b",
+                    "openai/gpt-oss-20b",
+                    "qwen/qwen3.8-27b"
+                ]
+            },
+            ollama: {
+                connection: { status: "offline", latency_ms: null },
+                models: []
+            }
+        };
         let hasMessages = false;
 
         // Clean model registry — zero emojis
@@ -915,13 +928,16 @@
         });
 
         // Provider Selection (No emojis)
-        function selectProvider(providerKey, label) {
+        async function selectProvider(providerKey, label) {
             currentProvider = providerKey;
             document.getElementById("currentProviderLabel").innerText = label;
             document.querySelectorAll("#providerDropdown .dropdown-item").forEach(item => {
                 item.classList.toggle("active", item.getAttribute("onclick").includes(`'${providerKey}'`));
             });
             closeAllDropdowns();
+            if (providerKey === "ollama") {
+                await discoverLocalModels();
+            }
             updateModelDropdown();
         }
 
@@ -933,6 +949,43 @@
                 item.classList.toggle("active", item.getAttribute("data-model-id") === modelId);
             });
             closeAllDropdowns();
+        }
+
+        // Direct Local Model Discovery via Ollama Daemon
+        async function discoverLocalModels() {
+            const localChip = document.getElementById("localTelemetry");
+            const localLatency = document.getElementById("localLatency");
+
+            try {
+                const start = performance.now();
+                const res = await fetch("http://localhost:11434/api/tags");
+                const latency = Math.round(performance.now() - start);
+
+                if (res.ok) {
+                    const data = await res.json();
+                    const models = (data.models || []).map(m => m.name);
+                    systemStatus.ollama = {
+                        connection: { status: "online", latency_ms: latency },
+                        models: models
+                    };
+                    if (localChip) localChip.className = "telemetry-chip";
+                    if (localLatency) localLatency.innerText = `${latency}ms`;
+                } else {
+                    systemStatus.ollama = {
+                        connection: { status: "offline" },
+                        models: []
+                    };
+                    if (localChip) localChip.className = "telemetry-chip offline";
+                    if (localLatency) localLatency.innerText = "Offline";
+                }
+            } catch (err) {
+                systemStatus.ollama = {
+                    connection: { status: "offline" },
+                    models: []
+                };
+                if (localChip) localChip.className = "telemetry-chip offline";
+                if (localLatency) localLatency.innerText = "Offline";
+            }
         }
 
         // Rebuild Model Dropdown based on active Provider
@@ -952,8 +1005,18 @@
                 return;
             }
 
-            models.forEach((mId, index) => {
-                const meta = MODEL_META[mId] || { name: mId, desc: "General-purpose model" };
+            // Determine preferred default model
+            let defaultModel = models[0];
+            if (currentModel && models.includes(currentModel)) {
+                defaultModel = currentModel;
+            } else if (currentProvider === "groq" && models.includes("openai/gpt-oss-120b")) {
+                defaultModel = "openai/gpt-oss-120b";
+            } else if (currentProvider === "ollama" && models.includes("llama3.2:1b")) {
+                defaultModel = "llama3.2:1b";
+            }
+
+            models.forEach((mId) => {
+                const meta = MODEL_META[mId] || MODEL_META[mId.replace(/:latest$/, "")] || { name: mId, desc: "Local Ollama model" };
                 const btn = document.createElement("button");
                 btn.className = "dropdown-item";
                 btn.setAttribute("data-model-id", mId);
@@ -964,53 +1027,49 @@
                     <span class="item-desc">${escapeHtml(meta.desc)}</span>
                 `;
 
-                dropdown.appendChild(btn);
-
-                // Auto-select preferred default
-                if (index === 0 || (currentProvider === "groq" && mId === "openai/gpt-oss-120b") || (currentProvider === "ollama" && mId === "llama3.2:1b")) {
+                if (mId === defaultModel) {
                     currentModel = mId;
                     document.getElementById("currentModelLabel").innerText = meta.name;
                     btn.classList.add("active");
                 }
+
+                dropdown.appendChild(btn);
             });
         }
 
         // Load Live System Status & Typographic Telemetry
         async function loadStatus() {
+            // 1. Discover local Ollama models directly from http://localhost:11434/api/tags
+            await discoverLocalModels();
+
+            // 2. Check Cloud status if /api/status is available (e.g. Gateway) or default to Online
+            const cloudChip = document.getElementById("cloudTelemetry");
+            const cloudLatency = document.getElementById("cloudLatency");
             try {
                 const res = await fetch("/api/status");
-                systemStatus = await res.json();
-
-                // Groq Telemetry
-                const groqConn = systemStatus.groq?.connection;
-                const cloudChip = document.getElementById("cloudTelemetry");
-                const cloudLatency = document.getElementById("cloudLatency");
-                if (groqConn && groqConn.status === "online") {
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.groq) {
+                        systemStatus.groq = data.groq;
+                        const groqConn = data.groq.connection;
+                        if (groqConn && groqConn.status === "online") {
+                            cloudChip.className = "telemetry-chip";
+                            cloudLatency.innerText = `${Math.round(groqConn.latency_ms)}ms`;
+                        } else {
+                            cloudChip.className = "telemetry-chip offline";
+                            cloudLatency.innerText = "Offline";
+                        }
+                    }
+                } else {
                     cloudChip.className = "telemetry-chip";
-                    cloudLatency.innerText = `${Math.round(groqConn.latency_ms)}ms`;
-                } else {
-                    cloudChip.className = "telemetry-chip offline";
-                    cloudLatency.innerText = "Offline";
+                    cloudLatency.innerText = "Online";
                 }
-
-                // Ollama Telemetry
-                const ollamaConn = systemStatus.ollama?.connection;
-                const localChip = document.getElementById("localTelemetry");
-                const localLatency = document.getElementById("localLatency");
-                if (ollamaConn && ollamaConn.status === "online") {
-                    localChip.className = "telemetry-chip";
-                    localLatency.innerText = `${Math.round(ollamaConn.latency_ms)}ms`;
-                } else {
-                    localChip.className = "telemetry-chip offline";
-                    localLatency.innerText = "Offline";
-                }
-
-                updateModelDropdown();
             } catch (err) {
-                console.error("Failed to fetch system status:", err);
-                document.getElementById("cloudLatency").innerText = "Unavailable";
-                document.getElementById("localLatency").innerText = "Unavailable";
+                cloudChip.className = "telemetry-chip";
+                cloudLatency.innerText = "Online";
             }
+
+            updateModelDropdown();
         }
 
         // Textarea auto-resize
@@ -1082,9 +1141,9 @@
         }
 
         // Re-run the same prompt on the opposing engine
-        function reRunOnOpposite(targetProvider, promptText) {
+        async function reRunOnOpposite(targetProvider, promptText) {
             const label = targetProvider === "groq" ? "Groq (Cloud)" : "Ollama (Local)";
-            selectProvider(targetProvider, label);
+            await selectProvider(targetProvider, label);
             sendMessage(promptText);
         }
 
@@ -1186,27 +1245,69 @@
             typing.classList.add("active");
             scrollToBottom();
 
+            const startTime = performance.now();
+
             try {
-                const response = await fetch("/api/chat", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        prompt: text,
-                        message: text,
-                        provider: currentProvider,
-                        model: currentModel
-                    })
-                });
+                if (currentProvider === "ollama") {
+                    // Local (Ollama) request sent directly to http://localhost:11434/api/generate
+                    const response = await fetch("http://localhost:11434/api/generate", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            model: currentModel || "llama3.2:1b",
+                            prompt: text,
+                            stream: false
+                        })
+                    });
 
-                const data = await response.json();
+                    const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
+                    const data = await response.json();
 
-                if (response.ok && data.success) {
-                    appendAssistantMessage(data, text);
+                    if (response.ok) {
+                        appendAssistantMessage({
+                            success: true,
+                            provider: "Ollama (Local)",
+                            model: currentModel || data.model || "llama3.2:1b",
+                            reply: data.response || "",
+                            time_sec: elapsed
+                        }, text);
+                    } else {
+                        appendErrorMessage(data.error || "Inference error returned from Ollama.");
+                    }
                 } else {
-                    appendErrorMessage(data.error || "Inference error returned from Model Gateway.");
+                    // Cloud (Groq) request using relative path /api/chat
+                    const response = await fetch("/api/chat", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            prompt: text,
+                            message: text,
+                            provider: currentProvider,
+                            model: currentModel || "openai/gpt-oss-120b"
+                        })
+                    });
+
+                    const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
+                    const data = await response.json();
+
+                    if (response.ok && data.success !== false) {
+                        appendAssistantMessage({
+                            success: true,
+                            provider: data.provider || "Groq (Cloud)",
+                            model: data.model || currentModel || "openai/gpt-oss-120b",
+                            reply: data.reply || "",
+                            time_sec: data.time_sec !== undefined ? data.time_sec : elapsed
+                        }, text);
+                    } else {
+                        appendErrorMessage(data.error || "Inference error returned from Cloud API.");
+                    }
                 }
             } catch (err) {
-                appendErrorMessage("Connection error: Unable to reach Gateway server at http://127.0.0.1:5000.");
+                if (currentProvider === "ollama") {
+                    appendErrorMessage("Connection error: Unable to reach Ollama at http://localhost:11434. Make sure Ollama is running locally.");
+                } else {
+                    appendErrorMessage("Connection error: Unable to reach Cloud API at /api/chat.");
+                }
             } finally {
                 sendBtn.disabled = false;
                 typing.classList.remove("active");
