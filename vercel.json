@@ -1,12 +1,16 @@
 {
-    "rewrites": [
-        {
-            "source": "/api/chat",
-            "destination": "/api/chat.py"
-        },
-        {
-            "source": "/(.*)",
-            "destination": "/week-4/templates/$1"
-        }
-    ]
+  "rewrites": [
+    {
+      "source": "/api/chat",
+      "destination": "/api/chat"
+    },
+    {
+      "source": "/",
+      "destination": "/week-4/templates/index.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/week-4/templates/$1"
+    }
+  ]
 }
