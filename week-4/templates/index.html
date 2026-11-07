@@ -951,41 +951,60 @@
             closeAllDropdowns();
         }
 
-        // Direct Local Model Discovery via Ollama Daemon
+        // Scans Ollama and LM Studio to find EVERY offline model on the device
         async function discoverLocalModels() {
             const localChip = document.getElementById("localTelemetry");
             const localLatency = document.getElementById("localLatency");
 
+            // 1. Try Ollama (port 11434)
             try {
                 const start = performance.now();
                 const res = await fetch("http://localhost:11434/api/tags");
-                const latency = Math.round(performance.now() - start);
-
                 if (res.ok) {
                     const data = await res.json();
                     const models = (data.models || []).map(m => m.name);
+                    const latency = Math.round(performance.now() - start);
+
                     systemStatus.ollama = {
-                        connection: { status: "online", latency_ms: latency },
+                        connection: { status: "online", latency_ms: latency, type: "ollama" },
                         models: models
                     };
                     if (localChip) localChip.className = "telemetry-chip";
-                    if (localLatency) localLatency.innerText = `${latency}ms`;
-                } else {
-                    systemStatus.ollama = {
-                        connection: { status: "offline" },
-                        models: []
-                    };
-                    if (localChip) localChip.className = "telemetry-chip offline";
-                    if (localLatency) localLatency.innerText = "Offline";
+                    if (localLatency) localLatency.innerText = `${models.length} models (${latency}ms)`;
+                    updateModelDropdown();
+                    return;
                 }
-            } catch (err) {
-                systemStatus.ollama = {
-                    connection: { status: "offline" },
-                    models: []
-                };
-                if (localChip) localChip.className = "telemetry-chip offline";
-                if (localLatency) localLatency.innerText = "Offline";
+            } catch (e) {
+                // Ollama not reachable, try LM Studio below
             }
+
+            // 2. Try LM Studio / llama.cpp (port 1234 or 8080)
+            try {
+                const start = performance.now();
+                const res = await fetch("http://localhost:1234/v1/models");
+                if (res.ok) {
+                    const data = await res.json();
+                    const models = (data.data || []).map(m => m.id);
+                    const latency = Math.round(performance.now() - start);
+
+                    systemStatus.ollama = {
+                        connection: { status: "online", latency_ms: latency, type: "openai-compatible" },
+                        models: models
+                    };
+                    if (localChip) localChip.className = "telemetry-chip";
+                    if (localLatency) localLatency.innerText = `LM Studio: ${models.length} models`;
+                    updateModelDropdown();
+                    return;
+                }
+            } catch (e) {
+                // Local servers not running
+            }
+
+            // 3. Neither detected
+            systemStatus.ollama = { connection: { status: "offline" }, models: [] };
+            if (localChip) localChip.className = "telemetry-chip offline";
+            if (localLatency) localLatency.innerText = "Offline";
+            updateModelDropdown();
         }
 
         // Rebuild Model Dropdown based on active Provider
@@ -1249,31 +1268,35 @@
 
             try {
                 if (currentProvider === "ollama") {
-                    // Local (Ollama) request sent directly to http://localhost:11434/api/generate
-                    const response = await fetch("http://localhost:11434/api/generate", {
+                    const isLMStudio = systemStatus.ollama?.connection?.type === "openai-compatible";
+                    let endpoint = "http://localhost:11434/api/generate";
+                    let payload = { model: currentModel, prompt: text, stream: false };
+
+                    if (isLMStudio) {
+                        endpoint = "http://localhost:1234/v1/chat/completions";
+                        payload = { model: currentModel, messages: [{ role: "user", content: text }] };
+                    }
+
+                    const response = await fetch(endpoint, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            model: currentModel || "llama3.2:1b",
-                            prompt: text,
-                            stream: false
-                        })
+                        body: JSON.stringify(payload)
                     });
 
-                    const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
                     const data = await response.json().catch(() => ({}));
 
                     if (response.ok) {
+                        const reply = isLMStudio ? data.choices?.[0]?.message?.content : data.response;
                         appendAssistantMessage({
                             success: true,
-                            provider: "Ollama (Local)",
-                            model: currentModel || data.model || "llama3.2:1b",
-                            reply: data.response || "",
-                            time_sec: elapsed
+                            provider: isLMStudio ? "LM Studio (Local)" : "Ollama (Local)",
+                            model: currentModel,
+                            reply: reply || "",
+                            time_sec: ((performance.now() - startTime) / 1000).toFixed(2)
                         }, text);
                     } else {
                         const errMsg = typeof data.error === "object" ? (data.error?.message || JSON.stringify(data.error)) : data.error;
-                        appendErrorMessage(`Error (${response.status}): ${errMsg || "Inference error returned from Ollama."}`);
+                        appendErrorMessage(`Error (${response.status}): ${errMsg || (isLMStudio ? "Inference error from LM Studio." : "Inference error returned from Ollama.")}`);
                     }
                 } else {
                     // Cloud (Groq) request using relative path /api/chat
@@ -1307,7 +1330,9 @@
                 }
             } catch (err) {
                 if (currentProvider === "ollama") {
-                    appendErrorMessage(`Connection error: Unable to reach Ollama at http://localhost:11434 (${err.message || "service unreachable"}). Make sure Ollama is running locally.`);
+                    const isLMStudio = systemStatus.ollama?.connection?.type === "openai-compatible";
+                    const target = isLMStudio ? "LM Studio at http://localhost:1234" : "Ollama at http://localhost:11434";
+                    appendErrorMessage(`Connection error: Unable to reach ${target} (${err.message || "service unreachable"}). Make sure your local runner is active.`);
                 } else {
                     appendErrorMessage(`Connection error: Unable to reach Cloud API at /api/chat (${err.message || "network error"}).`);
                 }
