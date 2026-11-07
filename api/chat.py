@@ -10,13 +10,15 @@ class handler(BaseHTTPRequestHandler):
         body = self.rfile.read(content_length)
         data = json.loads(body.decode("utf-8")) if body else {}
 
-        # Accept either "prompt" or "message" (supports both frontend styles)
         prompt = data.get("prompt") or data.get("message") or ""
         model = data.get("model") or "openai/gpt-oss-120b"
         api_key = os.environ.get("GROQ_API_KEY")
 
         if not api_key:
-            self._send(500, {"success": False, "error": "GROQ_API_KEY not configured in Vercel Environment Variables."})
+            self._send(500, {
+                "success": False,
+                "error": "GROQ_API_KEY is missing in Vercel. Please check Settings -> Environment Variables in Vercel."
+            })
             return
 
         payload = {
@@ -30,7 +32,8 @@ class handler(BaseHTTPRequestHandler):
             data=json.dumps(payload).encode("utf-8"),
             headers={
                 "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
             },
             method="POST"
         )
@@ -39,12 +42,17 @@ class handler(BaseHTTPRequestHandler):
             with urllib.request.urlopen(req, timeout=25) as response:
                 result = json.loads(response.read().decode("utf-8"))
                 reply = result["choices"][0]["message"]["content"].strip()
-                self._send(200, {"success": True, "reply": reply, "provider": "Groq (Cloud)", "model": model})
+                self._send(200, {
+                    "success": True,
+                    "reply": reply,
+                    "provider": "Groq (Cloud)",
+                    "model": model
+                })
         except urllib.error.HTTPError as e:
             err_msg = e.read().decode("utf-8")
             self._send(e.code, {"success": False, "error": f"Groq Error ({e.code}): {err_msg}"})
         except Exception as e:
-            self._send(500, {"success": False, "error": f"Gateway Error: {str(e)}"})
+            self._send(500, {"success": False, "error": f"Server Error: {str(e)}"})
 
     def _send(self, code, data):
         self.send_response(code)
