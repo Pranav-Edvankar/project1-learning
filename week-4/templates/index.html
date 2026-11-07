@@ -1261,7 +1261,7 @@
                     });
 
                     const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
-                    const data = await response.json();
+                    const data = await response.json().catch(() => ({}));
 
                     if (response.ok) {
                         appendAssistantMessage({
@@ -1272,7 +1272,8 @@
                             time_sec: elapsed
                         }, text);
                     } else {
-                        appendErrorMessage(data.error || "Inference error returned from Ollama.");
+                        const errMsg = typeof data.error === "object" ? (data.error?.message || JSON.stringify(data.error)) : data.error;
+                        appendErrorMessage(`Error (${response.status}): ${errMsg || "Inference error returned from Ollama."}`);
                     }
                 } else {
                     // Cloud (Groq) request using relative path /api/chat
@@ -1288,9 +1289,9 @@
                     });
 
                     const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
-                    const data = await response.json();
+                    const data = await response.json().catch(() => ({}));
 
-                    if (response.ok && data.success !== false) {
+                    if (response.ok && data.success) {
                         appendAssistantMessage({
                             success: true,
                             provider: data.provider || "Groq (Cloud)",
@@ -1299,14 +1300,16 @@
                             time_sec: data.time_sec !== undefined ? data.time_sec : elapsed
                         }, text);
                     } else {
-                        appendErrorMessage(data.error || "Inference error returned from Cloud API.");
+                        // Shows the exact error message from the server instead of a generic error
+                        const errMsg = typeof data.error === "object" ? (data.error?.message || JSON.stringify(data.error)) : data.error;
+                        appendErrorMessage(`Error (${response.status}): ${errMsg || "Unable to reach server"}`);
                     }
                 }
             } catch (err) {
                 if (currentProvider === "ollama") {
-                    appendErrorMessage("Connection error: Unable to reach Ollama at http://localhost:11434. Make sure Ollama is running locally.");
+                    appendErrorMessage(`Connection error: Unable to reach Ollama at http://localhost:11434 (${err.message || "service unreachable"}). Make sure Ollama is running locally.`);
                 } else {
-                    appendErrorMessage("Connection error: Unable to reach Cloud API at /api/chat.");
+                    appendErrorMessage(`Connection error: Unable to reach Cloud API at /api/chat (${err.message || "network error"}).`);
                 }
             } finally {
                 sendBtn.disabled = false;
