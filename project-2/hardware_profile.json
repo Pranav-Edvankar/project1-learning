@@ -1,0 +1,179 @@
+{
+  "profile": {
+    "os": "Windows 11 (64bit)",
+    "cpu": {
+      "name": "Intel64 Family 6 Model 167 Stepping 1, GenuineIntel",
+      "physical_cores": 6,
+      "logical_cores": 12
+    },
+    "ram": {
+      "total_gb": 15.82,
+      "available_gb": 6.67,
+      "used_gb": 9.15,
+      "percent_used": 57.8
+    },
+    "disk": {
+      "free_gb": 103.52,
+      "total_gb": 465.75
+    },
+    "gpu": {
+      "type": "Integrated / Hybrid",
+      "vram_gb": 0.0,
+      "devices": [
+        {
+          "name": "Intel(R) UHD Graphics 730 1073741824",
+          "vram_gb": "Shared / System Managed"
+        }
+      ]
+    }
+  },
+  "recommendations": [
+    {
+      "model": "Llama-3.2 (1.0B)",
+      "quant": "FP16",
+      "ram_required_gb": 3.57,
+      "status": "Pure CPU RAM (15-25 tps)",
+      "feasible": true
+    },
+    {
+      "model": "Llama-3.2 (1.0B)",
+      "quant": "Q8_0",
+      "ram_required_gb": 2.33,
+      "status": "Pure CPU RAM (15-25 tps)",
+      "feasible": true
+    },
+    {
+      "model": "Llama-3.2 (1.0B)",
+      "quant": "Q4_K_M",
+      "ram_required_gb": 1.63,
+      "status": "Pure CPU RAM (15-25 tps)",
+      "feasible": true
+    },
+    {
+      "model": "Llama-3.2 (1.0B)",
+      "quant": "Q3_K_S",
+      "ram_required_gb": 1.31,
+      "status": "Pure CPU RAM (15-25 tps)",
+      "feasible": true
+    },
+    {
+      "model": "Llama-3.2 (1.0B)",
+      "quant": "Q2_K",
+      "ram_required_gb": 1.0,
+      "status": "Pure CPU RAM (15-25 tps)",
+      "feasible": true
+    },
+    {
+      "model": "Llama-3.2 (3.0B)",
+      "quant": "Q8_0",
+      "ram_required_gb": 4.6,
+      "status": "Pure CPU RAM (15-25 tps)",
+      "feasible": true
+    },
+    {
+      "model": "Llama-3.2 (3.0B)",
+      "quant": "Q4_K_M",
+      "ram_required_gb": 2.9,
+      "status": "Pure CPU RAM (15-25 tps)",
+      "feasible": true
+    },
+    {
+      "model": "Llama-3.2 (3.0B)",
+      "quant": "Q3_K_S",
+      "ram_required_gb": 2.33,
+      "status": "Pure CPU RAM (15-25 tps)",
+      "feasible": true
+    },
+    {
+      "model": "Llama-3.2 (3.0B)",
+      "quant": "Q2_K",
+      "ram_required_gb": 1.79,
+      "status": "Pure CPU RAM (15-25 tps)",
+      "feasible": true
+    },
+    {
+      "model": "Qwen-2.5 (7.0B)",
+      "quant": "Q4_K_M",
+      "ram_required_gb": 5.44,
+      "status": "Pure CPU RAM (15-25 tps)",
+      "feasible": true
+    },
+    {
+      "model": "Qwen-2.5 (7.0B)",
+      "quant": "Q3_K_S",
+      "ram_required_gb": 4.36,
+      "status": "Pure CPU RAM (15-25 tps)",
+      "feasible": true
+    },
+    {
+      "model": "Qwen-2.5 (7.0B)",
+      "quant": "Q2_K",
+      "ram_required_gb": 3.38,
+      "status": "Pure CPU RAM (15-25 tps)",
+      "feasible": true
+    },
+    {
+      "model": "Llama-3.1 (8.0B)",
+      "quant": "Q4_K_M",
+      "ram_required_gb": 6.07,
+      "status": "Borderline / High OOM Risk",
+      "feasible": false
+    },
+    {
+      "model": "Llama-3.1 (8.0B)",
+      "quant": "Q3_K_S",
+      "ram_required_gb": 4.87,
+      "status": "Pure CPU RAM (15-25 tps)",
+      "feasible": true
+    },
+    {
+      "model": "Llama-3.1 (8.0B)",
+      "quant": "Q2_K",
+      "ram_required_gb": 3.77,
+      "status": "Pure CPU RAM (15-25 tps)",
+      "feasible": true
+    },
+    {
+      "model": "Qwen-2.5 (14.0B)",
+      "quant": "Q4_K_M",
+      "ram_required_gb": 9.88,
+      "status": "Infeasible on current RAM (Requires Disk Offload)",
+      "feasible": false
+    },
+    {
+      "model": "Qwen-2.5 (14.0B)",
+      "quant": "Q2_K",
+      "ram_required_gb": 6.15,
+      "status": "Borderline / High OOM Risk",
+      "feasible": false
+    },
+    {
+      "model": "Qwen-2.5 (32.0B)",
+      "quant": "Q4_K_M",
+      "ram_required_gb": 21.29,
+      "status": "Infeasible on current RAM (Requires Disk Offload)",
+      "feasible": false
+    },
+    {
+      "model": "Qwen-2.5 (32.0B)",
+      "quant": "Q2_K",
+      "ram_required_gb": 13.29,
+      "status": "Infeasible on current RAM (Requires Disk Offload)",
+      "feasible": false
+    },
+    {
+      "model": "Llama-3.1 (70.0B)",
+      "quant": "Q4_K_M",
+      "ram_required_gb": 45.38,
+      "status": "Infeasible on current RAM (Requires Disk Offload)",
+      "feasible": false
+    },
+    {
+      "model": "Llama-3.1 (70.0B)",
+      "quant": "Q2_K",
+      "ram_required_gb": 28.35,
+      "status": "Infeasible on current RAM (Requires Disk Offload)",
+      "feasible": false
+    }
+  ]
+}
