@@ -1,0 +1,5 @@
+Acme Corp Remote Work and Equipment Policy (2026)
+Employees are eligible for a $500 home-office equipment stipend after 90 days of employment.
+Standard core working hours are 10:00 AM to 4:00 PM Eastern Time for cross-team coordination.
+All company devices must have full-disk encryption enabled and use 2-factor authentication.
+Annual travel budgets allow up to $1,500 per team member for the annual engineering offsite.
