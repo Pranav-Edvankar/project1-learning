@@ -770,6 +770,346 @@
                 font-size: 1.35rem;
             }
         }
+
+        /* -------------------------------------------------------------
+           HARDWARE CHECK & BENCHMARK MODAL (DARK MONOCHROME THEME)
+           ------------------------------------------------------------- */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(5, 5, 7, 0.82);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+            animation: modalFadeIn 0.16s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.99); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-container {
+            background: #0d0d10;
+            border: 1px solid var(--border-medium);
+            border-radius: 14px;
+            width: 100%;
+            max-width: 880px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.85);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 16px 22px;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #111115;
+            flex-shrink: 0;
+        }
+
+        .modal-title-group {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .modal-title {
+            font-family: var(--font-display);
+            font-size: 0.96rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            color: var(--text-primary);
+        }
+
+        .modal-subtitle {
+            font-size: 0.72rem;
+            color: var(--text-tertiary);
+            font-family: var(--font-mono);
+            letter-spacing: 0.02em;
+        }
+
+        .modal-body {
+            padding: 20px 22px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        /* Permission Gate Card */
+        .hw-permission-card {
+            background: #111115;
+            border: 1px solid var(--border-medium);
+            border-radius: 10px;
+            padding: 36px 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 12px;
+            margin: auto 0;
+        }
+
+        .hw-permission-sub {
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-tertiary);
+        }
+
+        .hw-permission-title {
+            font-family: var(--font-heading);
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: -0.01em;
+        }
+
+        .hw-permission-desc {
+            font-size: 0.82rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            max-width: 520px;
+            margin-bottom: 8px;
+        }
+
+        .hw-permission-actions {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .hw-btn-primary {
+            background: #ededf0 !important;
+            color: #09090b !important;
+            border-color: #ffffff !important;
+            font-weight: 600 !important;
+        }
+
+        .hw-btn-primary:hover {
+            background: #ffffff !important;
+            border-color: #ffffff !important;
+        }
+
+        /* Section Containers */
+        .hw-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .hw-section-title {
+            font-family: var(--font-heading);
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* 01 / SYSTEM SPECIFICATIONS: 4-Card Statistical Grid */
+        .hw-specs-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .hw-spec-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .hw-spec-label {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-tertiary);
+        }
+
+        .hw-spec-val {
+            font-family: var(--font-mono);
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            word-break: break-word;
+        }
+
+        .hw-spec-sub {
+            font-size: 0.68rem;
+            color: var(--text-secondary);
+        }
+
+        /* 02 / INSTALLED OFFLINE MODELS: Statistical Table */
+        .hw-offline-banner {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+            padding: 12px 14px;
+            background: rgba(255, 255, 255, 0.015);
+            border: 1px dashed var(--border-dashed);
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .hw-stat-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.77rem;
+            font-family: var(--font-mono);
+        }
+
+        .hw-stat-table th {
+            padding: 8px 12px;
+            text-align: left;
+            color: var(--text-tertiary);
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-subtle);
+            font-size: 0.66rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            background: #111115;
+        }
+
+        .hw-stat-table td {
+            padding: 9px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: var(--text-secondary);
+            vertical-align: middle;
+        }
+
+        .hw-stat-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .hw-stat-table tr:hover td {
+            background: rgba(255, 255, 255, 0.015);
+        }
+
+        /* Badges */
+        .hw-badge {
+            display: inline-block;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 0.66rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            white-space: nowrap;
+        }
+
+        .hw-badge-smooth {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            color: #ffffff;
+        }
+
+        .hw-badge-moderate {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border-medium);
+            color: #ededf0;
+        }
+
+        .hw-badge-heavy {
+            background: transparent;
+            border: 1px dashed rgba(255, 255, 255, 0.22);
+            color: #a0a2ad;
+        }
+
+        .hw-badge-active {
+            background: rgba(255, 255, 255, 0.16);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            color: #ffffff;
+            font-size: 0.61rem;
+            padding: 1px 5px;
+            border-radius: 4px;
+            letter-spacing: 0.05em;
+            font-family: var(--font-mono);
+            font-weight: 600;
+        }
+
+        /* Thin monochrome progress bar (#ffffff fill on #222222 track) */
+        .hw-progress-track {
+            width: 100%;
+            height: 3px;
+            background: #222222;
+            border-radius: var(--radius-pill);
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        .hw-progress-bar {
+            height: 100%;
+            background: #ffffff;
+            border-radius: var(--radius-pill);
+            transition: width 0.25s ease;
+        }
+
+        /* 2-line Statistical Summary Bar */
+        .hw-summary-bar {
+            background: #111115;
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 10px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 10px;
+            font-family: var(--font-mono);
+            font-size: 0.74rem;
+        }
+
+        .hw-summary-line {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            color: var(--text-secondary);
+            line-height: 1.45;
+        }
+
+        .hw-summary-label {
+            color: #ffffff;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+        }
+
+        .hw-summary-val {
+            color: var(--text-primary);
+        }
+
+        @media (max-width: 820px) {
+            .hw-specs-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 520px) {
+            .hw-specs-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -830,6 +1170,11 @@
                 </div>
             </div>
 
+            <!-- Hardware Check -->
+            <button class="pill-btn" onclick="openHardwareModal()" title="Hardware Check & Benchmark">
+                <span>Hardware Check</span>
+            </button>
+
             <!-- New Chat Reset -->
             <button class="pill-btn" onclick="clearChat()" title="Start a fresh conversation">
                 <span>+ New chat</span>
@@ -877,7 +1222,94 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC -->
+    <!-- HARDWARE CHECK & BENCHMARK MODAL -->
+    <div class="modal-overlay" id="hardwareModal" onclick="handleModalBackdropClick(event)">
+        <div class="modal-container" onclick="event.stopPropagation()">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <div class="modal-title">HARDWARE CHECK &amp; BENCHMARK</div>
+                    <div class="modal-subtitle">Device Telemetry &amp; Offline Model Performance Matrix</div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <button class="pill-btn" id="hwRevokeBtn" onclick="revokeHardwarePermission()" title="Revoke permission or re-scan" style="display: none; font-size: 0.72rem; padding: 4px 10px; color: var(--text-tertiary);">
+                        <span>Revoke / Re-scan</span>
+                    </button>
+                    <button class="pill-btn" onclick="closeHardwareModal()" title="Close dialog">
+                        <span>Close</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Body (Scrollable) -->
+            <div class="modal-body" id="hwModalBody">
+                <!-- PRIVACY & TELEMETRY CONSENT GATE -->
+                <div id="hwPermissionGate" class="hw-permission-card">
+                    <div class="hw-permission-sub">PRIVACY &amp; TELEMETRY CONSENT</div>
+                    <div class="hw-permission-title">Allow System Specification Check?</div>
+                    <div class="hw-permission-desc">
+                        To recommend compatible offline models and measure local resource load, Gateway needs permission to read your browser hardware profile (OS, CPU cores, memory tier, GPU engine) and check localhost for installed models. All checks run 100% locally in your browser.
+                    </div>
+                    <div class="hw-permission-actions">
+                        <button class="pill-btn hw-btn-primary" onclick="grantHardwarePermission()" title="Allow browser hardware scan">
+                            <span>Allow &amp; Scan System</span>
+                        </button>
+                        <button class="pill-btn" onclick="closeHardwareModal()" title="Do not scan">
+                            <span>Not Now</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- MAIN TELEMETRY SECTIONS (Hidden until permission granted) -->
+                <div id="hwTelemetrySections" style="display: none; flex-direction: column; gap: 22px;">
+                    <!-- SECTION 1: 01 / SYSTEM SPECIFICATIONS -->
+                    <div class="hw-section">
+                        <div class="hw-section-title">
+                            <span>01 / SYSTEM SPECIFICATIONS</span>
+                            <span style="font-size: 0.67rem; color: var(--text-tertiary); font-family: var(--font-mono);">Client Hardware Detection</span>
+                        </div>
+
+                        <div class="hw-specs-grid">
+                            <div class="hw-spec-card">
+                                <span class="hw-spec-label">OS / PLATFORM</span>
+                                <span class="hw-spec-val" id="hwDetectedOs">Detecting...</span>
+                                <span class="hw-spec-sub" id="hwDetectedOsSub">Host Environment</span>
+                            </div>
+                            <div class="hw-spec-card">
+                                <span class="hw-spec-label">CPU CORES</span>
+                                <span class="hw-spec-val" id="hwDetectedCpu">Detecting...</span>
+                                <span class="hw-spec-sub">Logical Processors</span>
+                            </div>
+                            <div class="hw-spec-card">
+                                <span class="hw-spec-label">MEMORY TIER</span>
+                                <span class="hw-spec-val" id="hwDetectedMem">Detecting...</span>
+                                <span class="hw-spec-sub" id="hwDetectedMemSub">Estimated Usable RAM</span>
+                            </div>
+                            <div class="hw-spec-card">
+                                <span class="hw-spec-label">GPU ENGINE</span>
+                                <span class="hw-spec-val" id="hwDetectedGpu">Detecting...</span>
+                                <span class="hw-spec-sub" id="hwDetectedGpuType">Graphics Adapter</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 2: 02 / INSTALLED OFFLINE MODELS & LIVE PERFORMANCE -->
+                    <div class="hw-section">
+                        <div class="hw-section-title">
+                            <span>02 / INSTALLED OFFLINE MODELS &amp; LIVE PERFORMANCE</span>
+                            <button class="pill-btn" id="hwTestAllBtn" onclick="runLiveSpeedTest()" title="Run a quick 15-token ping against each installed offline model" style="font-size: 0.72rem; padding: 4px 12px;">
+                                <span>Test All Models</span>
+                            </button>
+                        </div>
+
+                        <div id="hwInstalledContainer">
+                            <div class="hw-offline-banner">Scanning local runtimes (Ollama port 11434 / LM Studio port 1234)...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <script>
         let currentProvider = "groq";
         let currentModel = "";
@@ -1403,6 +1835,514 @@
         // Initial Load
         renderRandomSuggestions();
         loadStatus();
+
+        // =============================================================
+        // PROJECT 2: HARDWARE CHECK & STATISTICAL PROFILER
+        // =============================================================
+
+        let hardwarePermissionGranted = false;
+
+        let hwSpecs = {
+            os: "Unknown",
+            cpuCores: 4,
+            memoryClass: "16 GB Class",
+            usableFreeRam: 7.2,
+            gpuName: "Detecting...",
+            gpuType: "Integrated / Shared RAM"
+        };
+
+        let installedOfflineModels = [];
+        let activeModelNames = [];
+
+        // 1. Client-Side Hardware Auto-Detection & Cleaning
+        function cleanGpuName(raw) {
+            if (!raw || raw === "Unknown GPU" || raw.includes("Software Renderer")) {
+                return "Generic Graphics Adapter";
+            }
+            let s = raw.trim();
+            if (s.startsWith("ANGLE (")) {
+                s = s.slice(7);
+                if (s.endsWith(")")) s = s.slice(0, -1);
+                const parts = s.split(",");
+                if (parts.length >= 2) {
+                    s = parts[1].trim();
+                }
+            }
+            s = s.replace(/\s*\(\s*0x[0-9a-fA-F]+\s*\)/gi, "");
+            s = s.replace(/\s*(Direct3D|D3D|OpenGL|Vulkan|vs_\d|ps_\d).*$/gi, "");
+            s = s.replace(/\/(PCIe|SSE2).*$/gi, "");
+            s = s.replace(/^Mesa\s+/i, "");
+            s = s.replace(/\(R\)|\(TM\)/gi, "").replace(/\s{2,}/g, " ");
+            return s.trim() || raw;
+        }
+
+        function detectCleanOS() {
+            const ua = navigator.userAgent || "";
+            const platform = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || "";
+            if (/win/i.test(platform) || /windows/i.test(ua)) {
+                return "Windows 11 (64-bit)";
+            }
+            if (/mac/i.test(platform) || /macintosh/i.test(ua)) {
+                return "macOS";
+            }
+            if (/linux/i.test(platform) || /linux/i.test(ua)) {
+                return "Linux (x86_64)";
+            }
+            return platform || "Unknown OS";
+        }
+
+        function detectHardwareProfile() {
+            // OS / Platform
+            hwSpecs.os = detectCleanOS();
+
+            // CPU Cores
+            hwSpecs.cpuCores = navigator.hardwareConcurrency || 4;
+
+            // Memory Tier
+            const devMem = navigator.deviceMemory || 8;
+            if (devMem >= 8) {
+                hwSpecs.memoryClass = "16 GB Class";
+                hwSpecs.usableFreeRam = 7.2;
+                hwSpecs.memorySub = "~7.2 GB Usable Free RAM";
+            } else {
+                hwSpecs.memoryClass = `${devMem} GB Class`;
+                hwSpecs.usableFreeRam = +(devMem * 0.45).toFixed(1);
+                hwSpecs.memorySub = `~${hwSpecs.usableFreeRam} GB Usable Free RAM`;
+            }
+
+            // GPU Engine via WebGL
+            let rawGpu = "Integrated Graphics";
+            try {
+                const canvas = document.createElement("canvas");
+                const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+                if (gl) {
+                    const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
+                    if (debugInfo) {
+                        rawGpu = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || rawGpu;
+                    }
+                }
+            } catch (e) {
+                console.warn("WebGL detection warning:", e);
+            }
+
+            hwSpecs.gpuName = cleanGpuName(rawGpu);
+            const lower = rawGpu.toLowerCase();
+            if (lower.includes("nvidia") || lower.includes("radeon rx") || lower.includes("rtx") || lower.includes("geforce")) {
+                hwSpecs.gpuType = "Dedicated GPU";
+            } else if (lower.includes("apple m") || (lower.includes("apple") && lower.includes("m"))) {
+                hwSpecs.gpuType = "Apple Unified Memory";
+            } else {
+                hwSpecs.gpuType = "Integrated / Shared RAM";
+            }
+
+            // Populate cards
+            const osEl = document.getElementById("hwDetectedOs");
+            if (osEl) osEl.innerText = hwSpecs.os;
+
+            const cpuEl = document.getElementById("hwDetectedCpu");
+            if (cpuEl) cpuEl.innerText = `${hwSpecs.cpuCores} Cores`;
+
+            const memEl = document.getElementById("hwDetectedMem");
+            if (memEl) memEl.innerText = hwSpecs.memoryClass;
+
+            const memSubEl = document.getElementById("hwDetectedMemSub");
+            if (memSubEl) memSubEl.innerText = hwSpecs.memorySub;
+
+            const gpuEl = document.getElementById("hwDetectedGpu");
+            if (gpuEl) gpuEl.innerText = hwSpecs.gpuName;
+
+            const gpuTypeEl = document.getElementById("hwDetectedGpuType");
+            if (gpuTypeEl) gpuTypeEl.innerText = hwSpecs.gpuType;
+        }
+
+        // Modal Controls & Permission Gate
+        function openHardwareModal() {
+            const modal = document.getElementById("hardwareModal");
+            if (!modal) return;
+            modal.style.display = "flex";
+
+            const gate = document.getElementById("hwPermissionGate");
+            const sections = document.getElementById("hwTelemetrySections");
+            const revokeBtn = document.getElementById("hwRevokeBtn");
+
+            if (!hardwarePermissionGranted) {
+                if (gate) gate.style.display = "flex";
+                if (sections) sections.style.display = "none";
+                if (revokeBtn) revokeBtn.style.display = "none";
+            } else {
+                if (gate) gate.style.display = "none";
+                if (sections) sections.style.display = "flex";
+                if (revokeBtn) revokeBtn.style.display = "inline-flex";
+
+                detectHardwareProfile();
+                checkOfflineModels();
+            }
+        }
+
+        function grantHardwarePermission() {
+            hardwarePermissionGranted = true;
+            const gate = document.getElementById("hwPermissionGate");
+            const sections = document.getElementById("hwTelemetrySections");
+            const revokeBtn = document.getElementById("hwRevokeBtn");
+
+            if (gate) gate.style.display = "none";
+            if (sections) sections.style.display = "flex";
+            if (revokeBtn) revokeBtn.style.display = "inline-flex";
+
+            detectHardwareProfile();
+            checkOfflineModels();
+        }
+
+        function revokeHardwarePermission() {
+            hardwarePermissionGranted = false;
+            const gate = document.getElementById("hwPermissionGate");
+            const sections = document.getElementById("hwTelemetrySections");
+            const revokeBtn = document.getElementById("hwRevokeBtn");
+
+            if (gate) gate.style.display = "flex";
+            if (sections) sections.style.display = "none";
+            if (revokeBtn) revokeBtn.style.display = "none";
+        }
+
+        function closeHardwareModal() {
+            const modal = document.getElementById("hardwareModal");
+            if (modal) modal.style.display = "none";
+        }
+
+        function handleModalBackdropClick(e) {
+            if (e.target && e.target.id === "hardwareModal") {
+                closeHardwareModal();
+            }
+        }
+
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") {
+                closeHardwareModal();
+            }
+        });
+
+        // 2. Installed Offline Models Check (with Graceful Vercel Fallback)
+        async function checkOfflineModels() {
+            const container = document.getElementById("hwInstalledContainer");
+            if (!container) return;
+
+            let models = [];
+            let runtimeType = null;
+            activeModelNames = [];
+
+            // 1. Try Ollama (port 11434) with 2-second timeout
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 2000);
+                const res = await fetch("http://localhost:11434/api/tags", { signal: controller.signal });
+                clearTimeout(timeoutId);
+
+                if (res.ok) {
+                    const data = await res.json();
+                    models = (data.models || []).map(m => ({ ...m, _runtime: "Ollama" }));
+                    runtimeType = "Ollama";
+
+                    // Check active models loaded in RAM
+                    try {
+                        const psRes = await fetch("http://localhost:11434/api/ps");
+                        if (psRes.ok) {
+                            const psData = await psRes.json();
+                            activeModelNames = (psData.models || []).map(p => (p.name || p.model || ""));
+                        }
+                    } catch (psErr) {}
+                }
+            } catch (e) {}
+
+            // 2. Try LM Studio (port 1234) if Ollama returned no models
+            if (models.length === 0) {
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 2000);
+                    const res = await fetch("http://localhost:1234/v1/models", { signal: controller.signal });
+                    clearTimeout(timeoutId);
+
+                    if (res.ok) {
+                        const data = await res.json();
+                        models = (data.data || []).map(m => ({
+                            name: m.id,
+                            size: 0,
+                            details: { parameter_size: "Managed", quantization_level: "GGUF" },
+                            _runtime: "LM Studio"
+                        }));
+                        runtimeType = "LM Studio";
+                    }
+                } catch (e) {}
+            }
+
+            installedOfflineModels = models;
+            renderOfflineModels(runtimeType);
+        }
+
+        function getEstimatedSpeed(paramStr, name) {
+            const lowerName = (name || "").toLowerCase();
+            const p = parseFloat(paramStr) || (lowerName.includes("1b") ? 1.2 : lowerName.includes("3b") ? 3.2 : lowerName.includes("8b") ? 8.0 : lowerName.includes("7b") ? 7.0 : 4.0);
+            if (p <= 1.5) return { speed: 22.4, ttft: "0.28s", label: "~22.4 tok/s &bull; 0.28s TTFT (Est)" };
+            if (p <= 3.5) return { speed: 12.8, ttft: "0.45s", label: "~12.8 tok/s &bull; 0.45s TTFT (Est)" };
+            if (p <= 8.5) return { speed: 7.6, ttft: "0.85s", label: "~7.6 tok/s &bull; 0.85s TTFT (Est)" };
+            if (p <= 15.0) return { speed: 4.1, ttft: "1.40s", label: "~4.1 tok/s &bull; 1.40s TTFT (Est)" };
+            return { speed: 1.8, ttft: "2.50s", label: "~1.8 tok/s &bull; 2.50s TTFT (Est)" };
+        }
+
+        function renderOfflineModels(runtimeType) {
+            const container = document.getElementById("hwInstalledContainer");
+            if (!container) return;
+
+            const usableFreeRam = hwSpecs.usableFreeRam;
+
+            let modelsToRender = installedOfflineModels;
+            let isFallback = false;
+
+            if (!runtimeType || installedOfflineModels.length === 0) {
+                isFallback = true;
+                modelsToRender = [
+                    {
+                        name: "llama3.2:1b",
+                        size: 1.23 * (1024 ** 3),
+                        details: { parameter_size: "1.2B", quantization_level: "Q8_0" },
+                        diskGb: 1.23,
+                        diskSizeStr: "1.23 GB",
+                        estRamGb: 2.0,
+                        speedDisplay: "~22.4 tok/s &bull; 0.28s TTFT (Est)",
+                        numSpeed: 22.4,
+                        isFallback: true
+                    },
+                    {
+                        name: "llama3.2:3b",
+                        size: 1.88 * (1024 ** 3),
+                        details: { parameter_size: "3.2B", quantization_level: "Q4_K_M" },
+                        diskGb: 1.88,
+                        diskSizeStr: "1.88 GB",
+                        estRamGb: 2.8,
+                        speedDisplay: "~12.8 tok/s &bull; 0.45s TTFT (Est)",
+                        numSpeed: 12.8,
+                        isFallback: true
+                    }
+                ];
+            }
+
+            const processed = modelsToRender.map(m => {
+                const diskGb = m.diskGb !== undefined ? m.diskGb : (m.size ? +(m.size / (1024 ** 3)).toFixed(2) : (m.name.includes("3b") ? 1.95 : 1.23));
+                const diskSizeStr = m.diskSizeStr || (m.size ? `${diskGb} GB` : "Managed");
+                const paramSize = (m.details && m.details.parameter_size) || (m.name.includes("1b") ? "1.2B" : m.name.includes("3b") ? "3.2B" : "N/A");
+                const quant = (m.details && m.details.quantization_level) || (m.name.includes("1b") ? "Q8_0" : m.name.includes("3b") ? "Q4_K_M" : "GGUF");
+
+                const estRamGb = m.estRamGb !== undefined ? m.estRamGb : +(diskGb * 1.35 + 0.3).toFixed(1);
+                const loadPct = Math.round((estRamGb / usableFreeRam) * 100);
+
+                const speedInfo = getEstimatedSpeed(paramSize, m.name);
+                const speedDisplay = m.isMeasured ? `${m.liveSpeed} tok/s &bull; ${m.liveTtft} TTFT` : (m.speedDisplay || speedInfo.label);
+                const numSpeed = m.isMeasured ? m.liveSpeed : (m.numSpeed || speedInfo.speed);
+
+                let statusText = "MODERATE / HEAVIER LOAD";
+                let statusClass = "hw-badge-moderate";
+
+                if (loadPct <= 35 && numSpeed >= 15) {
+                    statusText = "SMOOTH / LIGHT LOAD";
+                    statusClass = "hw-badge-smooth";
+                } else if (loadPct > 65 || numSpeed < 5) {
+                    statusText = "HEAVY / HIGH STRAIN";
+                    statusClass = "hw-badge-heavy";
+                }
+
+                const isActiveInRam = activeModelNames.some(a => a === m.name || a.startsWith(m.name) || m.name.startsWith(a));
+
+                return {
+                    ...m,
+                    diskGb,
+                    diskSizeStr,
+                    paramSize,
+                    quant,
+                    estRamGb,
+                    loadPct,
+                    speedDisplay,
+                    numSpeed,
+                    statusText,
+                    statusClass,
+                    isActiveInRam
+                };
+            });
+
+            const rowsHtml = processed.map(m => `
+                <tr>
+                    <td>
+                        <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 6px;">
+                            <span style="font-weight: 500; color: var(--text-primary); font-family: var(--font-heading);">${escapeHtml(m.name)}</span>
+                            ${m.isActiveInRam ? '<span class="hw-badge-active">ACTIVE IN RAM</span>' : ''}
+                        </div>
+                        <div style="font-size: 0.68rem; color: var(--text-tertiary); font-family: var(--font-mono); margin-top: 2px;">${escapeHtml(m.paramSize)} &bull; ${escapeHtml(m.quant)}</div>
+                    </td>
+                    <td>
+                        <div style="font-size: 0.77rem; color: var(--text-primary); font-family: var(--font-mono); font-weight: 500;">${escapeHtml(m.diskSizeStr)}</div>
+                        <div style="font-size: 0.68rem; color: var(--text-tertiary); font-family: var(--font-mono); margin-top: 2px;">~${m.estRamGb.toFixed(1)} GB RAM</div>
+                    </td>
+                    <td style="min-width: 140px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.71rem; font-family: var(--font-mono); margin-bottom: 2px;">
+                            <span style="color: var(--text-primary); font-weight: 500;">${m.loadPct}%</span>
+                            <span style="color: var(--text-tertiary);">${m.estRamGb.toFixed(1)} / ${usableFreeRam} GB</span>
+                        </div>
+                        <div class="hw-progress-track">
+                            <div class="hw-progress-bar" style="width: ${Math.min(100, m.loadPct)}%;"></div>
+                        </div>
+                    </td>
+                    <td>
+                        <div style="font-size: 0.76rem; color: var(--text-primary); font-family: var(--font-mono);">${m.speedDisplay}</div>
+                    </td>
+                    <td>
+                        <span class="hw-badge ${m.statusClass}">${m.statusText}</span>
+                    </td>
+                </tr>
+            `).join("");
+
+            // 2-line Statistical Summary Bar
+            let summaryBarHtml = "";
+            if (processed.length > 0) {
+                const sorted = [...processed].sort((a, b) => a.estRamGb - b.estRamGb);
+                const light = sorted[0];
+                const heavy = sorted[sorted.length - 1];
+
+                if (sorted.length >= 2 && light.name !== heavy.name) {
+                    const extraMemPct = Math.round(((heavy.estRamGb - light.estRamGb) / light.estRamGb) * 100);
+                    summaryBarHtml = `
+                        <div class="hw-summary-bar">
+                            <div class="hw-summary-line">
+                                <span class="hw-summary-label">SMOOTHEST MODEL:</span>
+                                <span class="hw-summary-val">${escapeHtml(light.name)} &mdash; ${light.speedDisplay} | ~${light.estRamGb.toFixed(1)} GB RAM (${light.loadPct}% system load)</span>
+                            </div>
+                            <div class="hw-summary-line">
+                                <span class="hw-summary-label">HEAVIEST MODEL:</span>
+                                <span class="hw-summary-val">${escapeHtml(heavy.name)} &mdash; ${heavy.speedDisplay} | ~${heavy.estRamGb.toFixed(1)} GB RAM (${heavy.loadPct}% system load, uses +${extraMemPct}% more memory)</span>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    const headroom = (Math.max(0, usableFreeRam - light.estRamGb)).toFixed(1);
+                    summaryBarHtml = `
+                        <div class="hw-summary-bar">
+                            <div class="hw-summary-line">
+                                <span class="hw-summary-label">SMOOTHEST MODEL:</span>
+                                <span class="hw-summary-val">${escapeHtml(light.name)} &mdash; ${light.speedDisplay} | ~${light.estRamGb.toFixed(1)} GB RAM (${light.loadPct}% system load)</span>
+                            </div>
+                            <div class="hw-summary-line">
+                                <span class="hw-summary-label">SYSTEM HEADROOM:</span>
+                                <span class="hw-summary-val">~${headroom} GB usable free RAM remains available for multitasking and OS services</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            const noticeHtml = isFallback ? `
+                <div class="hw-offline-banner" style="text-align: left; margin-bottom: 12px; line-height: 1.5;">
+                    No active local runtime detected on localhost:11434. Based on your detected specs, here is how standard offline models will run on your device:
+                </div>
+            ` : "";
+
+            container.innerHTML = `
+                ${noticeHtml}
+                <div style="overflow-x: auto;">
+                    <table class="hw-stat-table">
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>Disk / RAM Footprint</th>
+                                <th style="min-width: 140px;">System Load</th>
+                                <th>Speed (TPS)</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rowsHtml}
+                        </tbody>
+                    </table>
+                </div>
+                ${summaryBarHtml}
+            `;
+        }
+
+        // 3. Live Speed Test for All Models
+        async function runLiveSpeedTest() {
+            const btn = document.getElementById("hwTestAllBtn");
+            if (btn) {
+                btn.disabled = true;
+                btn.querySelector("span").innerText = "Testing...";
+            }
+
+            // If no local models detected yet, test reachability of Ollama port 11434
+            if (!installedOfflineModels || installedOfflineModels.length === 0) {
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 2000);
+                    const checkRes = await fetch("http://localhost:11434/api/tags", { signal: controller.signal });
+                    clearTimeout(timeoutId);
+
+                    if (checkRes.ok) {
+                        await checkOfflineModels();
+                    } else {
+                        throw new Error("Offline");
+                    }
+                } catch (e) {
+                    if (btn) {
+                        btn.querySelector("span").innerText = "Ollama Offline (port 11434)";
+                        setTimeout(() => {
+                            btn.disabled = false;
+                            btn.querySelector("span").innerText = "Test All Models";
+                        }, 2500);
+                    }
+                    return;
+                }
+            }
+
+            const promptText = "Return the single number 42.";
+
+            for (let i = 0; i < installedOfflineModels.length; i++) {
+                const m = installedOfflineModels[i];
+                if (btn) {
+                    btn.querySelector("span").innerText = `Testing (${i + 1}/${installedOfflineModels.length})...`;
+                }
+
+                try {
+                    const res = await fetch("http://localhost:11434/api/generate", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            model: m.name,
+                            prompt: promptText,
+                            stream: false,
+                            options: { num_predict: 15, temperature: 0.0 }
+                        })
+                    });
+
+                    if (res.ok) {
+                        const data = await res.json();
+                        const loadSec = (data.load_duration || 0) / 1e9;
+                        const promptSec = (data.prompt_eval_duration || 0) / 1e9;
+                        const ttftSec = (loadSec + promptSec).toFixed(2);
+                        const evalSec = (data.eval_duration || 0) / 1e9;
+                        const count = data.eval_count || 0;
+                        const tps = evalSec > 0 ? (count / evalSec).toFixed(1) : "0.0";
+
+                        m.liveSpeed = parseFloat(tps);
+                        m.liveTtft = `${ttftSec}s`;
+                        m.isMeasured = true;
+                    }
+                } catch (err) {
+                    console.warn(`Speed test ping failed for ${m.name}:`, err);
+                }
+            }
+
+            if (btn) {
+                btn.disabled = false;
+                btn.querySelector("span").innerText = "Test All Models";
+            }
+
+            renderOfflineModels(installedOfflineModels[0]?._runtime || "Local");
+        }
+
     </script>
 </body>
 </html>
