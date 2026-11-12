@@ -754,6 +754,190 @@
         }
 
         /* -------------------------------------------------------------
+           PROJECT 3: DOCUMENT RAG ATTACHMENT & CITATIONS
+           ------------------------------------------------------------- */
+        .dock-inner {
+            width: 100%;
+            max-width: var(--column-width);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .dock-inner > * {
+            pointer-events: auto;
+        }
+
+        /* Removable monochrome active document pill badge */
+        .rag-source-badge {
+            background: #111115;
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-pill);
+            padding: 5px 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-mono);
+            font-size: 0.73rem;
+            color: var(--text-primary);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+            animation: fadeIn 0.16s ease-out;
+            max-width: 90vw;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .rag-badge-icon {
+            display: inline-flex;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        .rag-badge-text {
+            letter-spacing: 0.02em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .rag-badge-close {
+            background: transparent;
+            border: none;
+            color: var(--text-tertiary);
+            font-size: 1.15rem;
+            line-height: 1;
+            cursor: pointer;
+            padding: 0 2px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.15s ease;
+            flex-shrink: 0;
+        }
+
+        .rag-badge-close:hover {
+            color: #ffffff;
+        }
+
+        /* Document attach button inside input bar */
+        .attach-doc-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            flex-shrink: 0;
+            outline: none;
+            margin-bottom: 2px;
+            padding: 0;
+        }
+
+        .attach-doc-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+            border-color: var(--border-medium);
+        }
+
+        .attach-doc-btn svg {
+            width: 15px;
+            height: 15px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* Collapsible Verified Sources citation bar */
+        .citations-wrapper {
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .citations-toggle-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            padding: 5px 11px;
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            transition: all 0.15s ease;
+            outline: none;
+        }
+
+        .citations-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-primary);
+            border-color: var(--border-medium);
+        }
+
+        .citations-toggle-btn .chevron {
+            transition: transform 0.2s ease;
+            font-size: 0.65rem;
+            display: inline-block;
+        }
+
+        .citations-toggle-btn.expanded .chevron {
+            transform: rotate(180deg);
+        }
+
+        .citations-content {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .citations-content.active {
+            display: flex;
+        }
+
+        .citation-chunk-card {
+            background: rgba(255, 255, 255, 0.018);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 6px;
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .citation-chunk-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-family: var(--font-mono);
+            font-size: 0.69rem;
+            font-weight: 600;
+            color: #ededed;
+        }
+
+        .citation-chunk-text {
+            font-size: 0.77rem;
+            line-height: 1.5;
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            background: rgba(0, 0, 0, 0.25);
+            padding: 6px 8px;
+            border-radius: 4px;
+            word-break: break-word;
+        }
+
+        /* -------------------------------------------------------------
            RESPONSIVE
            ------------------------------------------------------------- */
         @media (max-width: 820px) {
@@ -1207,18 +1391,35 @@
 
     <!-- FLOATING DOCK -->
     <div class="dock-bar">
-        <div class="input-box">
-            <textarea 
-                id="messageInput" 
-                class="message-input" 
-                rows="1" 
-                placeholder="Ask anything..." 
-                onkeydown="handleKey(event)"
-                oninput="handleInputResize(this)"></textarea>
+        <div class="dock-inner">
+            <!-- Active Document Removable Pill Badge -->
+            <div id="ragSourceBadge" class="rag-source-badge" style="display: none;">
+                <span class="rag-badge-icon">
+                    <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                </span>
+                <span id="ragBadgeLabel" class="rag-badge-text"></span>
+                <button type="button" class="rag-badge-close" onclick="removeActiveDocument()" title="Detach document">&times;</button>
+            </div>
+
+            <div class="input-box">
+                <!-- Attach Document Button -->
+                <button type="button" class="attach-doc-btn" onclick="document.getElementById('ragFileInput').click()" title="Attach Document (.txt, .md, .csv, .json, .pdf)">
+                    <svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                </button>
+                <input type="file" id="ragFileInput" accept=".txt,.md,.csv,.json,.pdf" style="display: none;" onchange="handleDocumentUpload(event)">
+                
+                <textarea 
+                    id="messageInput" 
+                    class="message-input" 
+                    rows="1" 
+                    placeholder="Ask anything..." 
+                    onkeydown="handleKey(event)"
+                    oninput="handleInputResize(this)"></textarea>
             
-            <button class="dispatch-btn" id="sendBtn" onclick="sendMessage()" title="Send">
-                <svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
-            </button>
+                <button class="dispatch-btn" id="sendBtn" onclick="sendMessage()" title="Send">
+                    <svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -1598,6 +1799,217 @@
             sendMessage(promptText);
         }
 
+        // =============================================================
+        // PROJECT 3: DOCUMENT INGESTION, CHUNKING & GROUNDED RAG SEARCH
+        // =============================================================
+
+        let activeChunks = [];
+        let activeDocumentName = null;
+
+        // Dynamic PDF.js Loader from CDN
+        async function loadPdfJs() {
+            if (window.pdfjsLib) return window.pdfjsLib;
+            return new Promise((resolve, reject) => {
+                const script = document.createElement("script");
+                script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+                script.onload = () => {
+                    if (window.pdfjsLib) {
+                        window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+                        resolve(window.pdfjsLib);
+                    } else {
+                        reject(new Error("PDF.js failed to initialize"));
+                    }
+                };
+                script.onerror = () => reject(new Error("Failed to load PDF.js engine from CDN"));
+                document.head.appendChild(script);
+            });
+        }
+
+        // Extract text from PDF page-by-page preserving exact page numbers
+        async function extractTextFromPdf(file) {
+            const pdfjs = await loadPdfJs();
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+            const pagesData = [];
+
+            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                const page = await pdf.getPage(pageNum);
+                const textContent = await page.getTextContent();
+                const pageText = textContent.items.map(item => item.str).join(" ").trim();
+                if (pageText) {
+                    pagesData.push({ page: pageNum, text: pageText });
+                }
+            }
+            return pagesData;
+        }
+
+        // Extract text from .txt, .md, .csv, .json
+        async function extractTextFromTextFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const text = (e.target.result || "").trim();
+                    resolve([{ page: 1, text: text }]);
+                };
+                reader.onerror = () => reject(new Error("Failed to read text document"));
+                reader.readAsText(file);
+            });
+        }
+
+        // Overlap Chunking Engine ported from project-3/ingest_rag.py
+        function chunkDocument(pagesData, filename, chunkSize = 500, chunkOverlap = 80) {
+            const chunks = [];
+            let chunkId = 1;
+
+            for (const p of pagesData) {
+                let text = (p.text || "").replace(/\s+/g, " ").trim();
+                const pageNum = p.page;
+                let start = 0;
+
+                while (start < text.length) {
+                    const end = start + chunkSize;
+                    const chunkStr = text.slice(start, end).trim();
+
+                    if (chunkStr) {
+                        chunks.push({
+                            id: chunkId++,
+                            source: filename,
+                            page: pageNum,
+                            content: chunkStr
+                        });
+                    }
+
+                    start += (chunkSize - chunkOverlap);
+                }
+            }
+            return chunks;
+        }
+
+        // Stop Words & Semantic Keyword / TF-IDF Retrieval
+        const RAG_STOP_WORDS = new Set([
+            "a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are", "aren't",
+            "as", "at", "be", "because", "been", "before", "being", "below", "between", "both", "but", "by",
+            "can't", "cannot", "could", "couldn't", "did", "didn't", "do", "does", "doesn't", "doing", "don't",
+            "down", "during", "each", "few", "for", "from", "further", "had", "hadn't", "has", "hasn't", "have",
+            "haven't", "having", "he", "he'd", "he'll", "he's", "her", "here", "here's", "hers", "herself",
+            "him", "himself", "his", "how", "how's", "i", "i'd", "i'll", "i'm", "i've", "if", "in", "into",
+            "is", "isn't", "it", "it's", "its", "itself", "let's", "me", "more", "most", "mustn't", "my",
+            "myself", "no", "nor", "not", "of", "off", "on", "once", "only", "or", "other", "ought", "our",
+            "ours", "ourselves", "out", "over", "own", "same", "shan't", "she", "she'd", "she'll", "she's",
+            "should", "shouldn't", "so", "some", "such", "than", "that", "that's", "the", "their", "theirs",
+            "them", "themselves", "then", "there", "there's", "these", "they", "they'd", "they'll", "they're",
+            "they've", "this", "those", "through", "to", "too", "under", "until", "up", "very", "was", "wasn't",
+            "we", "we'd", "we'll", "we're", "we've", "were", "weren't", "what", "what's", "when", "when's",
+            "where", "where's", "which", "while", "who", "who's", "whom", "why", "why's", "with", "won't",
+            "would", "wouldn't", "you", "you'd", "you'll", "you're", "you've", "your", "yours", "yourself", "yourselves"
+        ]);
+
+        function tokenizeRagQuery(text) {
+            const matches = (text || "").toLowerCase().match(/\b\w+\b/g);
+            return matches ? matches.filter(w => !RAG_STOP_WORDS.has(w) && w.length > 1) : [];
+        }
+
+        function searchRelevantChunks(query, chunks, topK = 3) {
+            if (!chunks || chunks.length === 0) return [];
+
+            const isSummarize = /\b(summarize|summary|overview|brief|outline|tldr)\b/i.test(query);
+            if (isSummarize) {
+                return chunks.slice(0, 2);
+            }
+
+            const queryTokens = new Set(tokenizeRagQuery(query));
+            if (queryTokens.size === 0) {
+                return chunks.slice(0, topK);
+            }
+
+            const scored = [];
+            for (const c of chunks) {
+                const chunkWords = tokenizeRagQuery(c.content);
+                if (chunkWords.length === 0) continue;
+
+                let matches = 0;
+                for (const w of chunkWords) {
+                    if (queryTokens.has(w)) matches++;
+                }
+
+                const score = matches / (Math.sqrt(chunkWords.length) + 1e-5);
+                scored.push({ score, chunk: c });
+            }
+
+            scored.sort((a, b) => b.score - a.score);
+            const topScored = scored.filter(s => s.score > 0).slice(0, topK).map(s => s.chunk);
+
+            return topScored.length > 0 ? topScored : chunks.slice(0, topK);
+        }
+
+        // Handle Document Upload
+        async function handleDocumentUpload(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+
+            const ext = file.name.split('.').pop().toLowerCase();
+            const validExts = ['txt', 'md', 'csv', 'json', 'pdf'];
+            if (!validExts.includes(ext)) {
+                appendErrorMessage(`Unsupported document format (.${ext}). Please upload .txt, .md, .csv, .json, or .pdf`);
+                event.target.value = "";
+                return;
+            }
+
+            const badge = document.getElementById("ragSourceBadge");
+            const badgeLabel = document.getElementById("ragBadgeLabel");
+            const input = document.getElementById("messageInput");
+
+            if (badge && badgeLabel) {
+                badge.style.display = "inline-flex";
+                badgeLabel.innerText = `Indexing ${file.name}...`;
+            }
+
+            try {
+                let pagesData = [];
+                if (ext === "pdf") {
+                    pagesData = await extractTextFromPdf(file);
+                } else {
+                    pagesData = await extractTextFromTextFile(file);
+                }
+
+                if (!pagesData || pagesData.length === 0) {
+                    throw new Error("No readable text found in document.");
+                }
+
+                activeChunks = chunkDocument(pagesData, file.name, 500, 80);
+                activeDocumentName = file.name;
+
+                if (badge && badgeLabel) {
+                    badgeLabel.innerText = `Active Source: ${file.name} (${activeChunks.length} chunks indexed)`;
+                }
+
+                if (input) {
+                    input.placeholder = `Ask question about ${file.name}...`;
+                    input.focus();
+                }
+            } catch (err) {
+                console.error("Document ingestion error:", err);
+                appendErrorMessage(`Document ingestion error (${file.name}): ${err.message || "Failed to parse document"}`);
+                removeActiveDocument();
+            } finally {
+                event.target.value = "";
+            }
+        }
+
+        // Remove / Detach Active Document
+        function removeActiveDocument() {
+            activeChunks = [];
+            activeDocumentName = null;
+            const badge = document.getElementById("ragSourceBadge");
+            const input = document.getElementById("messageInput");
+            if (badge) badge.style.display = "none";
+            if (input) {
+                input.placeholder = "Ask anything...";
+            }
+            const fileInput = document.getElementById("ragFileInput");
+            if (fileInput) fileInput.value = "";
+        }
+
         // Append User Message
         function appendUserMessage(text) {
             const container = document.getElementById("chatContainer");
@@ -1617,8 +2029,8 @@
             scrollToBottom();
         }
 
-        // Append Assistant Message with Clean Typographic Header (Zero Dots)
-        function appendAssistantMessage(data, sourcePrompt) {
+        // Append Assistant Message with Clean Typographic Header & Citations
+        function appendAssistantMessage(data, sourcePrompt, retrievedChunks = null) {
             const container = document.getElementById("chatContainer");
             const group = document.createElement("div");
             group.className = "message-group assistant";
@@ -1653,6 +2065,46 @@
 
             card.appendChild(metaBar);
             card.appendChild(messageBody);
+
+            // Collapsible Verified Sources Citation Bar (Project 3 RAG)
+            if (retrievedChunks && retrievedChunks.length > 0) {
+                const citeWrapper = document.createElement("div");
+                citeWrapper.className = "citations-wrapper";
+
+                const toggleBtn = document.createElement("button");
+                toggleBtn.type = "button";
+                toggleBtn.className = "citations-toggle-btn";
+                toggleBtn.innerHTML = `
+                    <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                    <span>Verified Sources (${retrievedChunks.length} chunks retrieved)</span>
+                    <span class="chevron">▾</span>
+                `;
+
+                const contentBox = document.createElement("div");
+                contentBox.className = "citations-content";
+
+                retrievedChunks.forEach((c) => {
+                    const cardEl = document.createElement("div");
+                    cardEl.className = "citation-chunk-card";
+                    cardEl.innerHTML = `
+                        <div class="citation-chunk-header">
+                            <span>[Source: ${escapeHtml(c.source)}, Page ${c.page}, Chunk #${c.id}]</span>
+                        </div>
+                        <div class="citation-chunk-text">${escapeHtml(c.content)}</div>
+                    `;
+                    contentBox.appendChild(cardEl);
+                });
+
+                toggleBtn.onclick = () => {
+                    const isExpanded = contentBox.classList.toggle("active");
+                    toggleBtn.classList.toggle("expanded", isExpanded);
+                };
+
+                citeWrapper.appendChild(toggleBtn);
+                citeWrapper.appendChild(contentBox);
+                card.appendChild(citeWrapper);
+            }
+
             group.appendChild(card);
             container.appendChild(group);
             scrollToBottom();
@@ -1696,17 +2148,36 @@
             typing.classList.add("active");
             scrollToBottom();
 
+            // Project 3: RAG Grounded Retrieval & Prompt Augmentation
+            const isRagActive = activeChunks && activeChunks.length > 0;
+            let relevantChunks = null;
+            let promptToSend = text;
+
+            if (isRagActive) {
+                relevantChunks = searchRelevantChunks(text, activeChunks, 3);
+                const contextBlocks = relevantChunks.map(c => `[Source: ${c.source}, Page ${c.page}, Chunk #${c.id}]\n"${c.content}"`).join("\n\n");
+
+                promptToSend = `You are a company knowledge assistant. Answer the user's question STRICTLY using the retrieved document chunks below.
+Always cite your sources at the end of relevant sentences using the exact format: [Source: filename, Page X, Chunk #Y].
+If the answer is not in the provided context, state clearly that it is not in the uploaded document.
+
+Retrieved Context:
+${contextBlocks}
+
+User Question: ${text}`;
+            }
+
             const startTime = performance.now();
 
             try {
                 if (currentProvider === "ollama") {
                     const isLMStudio = systemStatus.ollama?.connection?.type === "openai-compatible";
                     let endpoint = "http://localhost:11434/api/generate";
-                    let payload = { model: currentModel, prompt: text, stream: false };
+                    let payload = { model: currentModel, prompt: promptToSend, stream: false };
 
                     if (isLMStudio) {
                         endpoint = "http://localhost:1234/v1/chat/completions";
-                        payload = { model: currentModel, messages: [{ role: "user", content: text }] };
+                        payload = { model: currentModel, messages: [{ role: "user", content: promptToSend }] };
                     }
 
                     const response = await fetch(endpoint, {
@@ -1725,7 +2196,7 @@
                             model: currentModel,
                             reply: reply || "",
                             time_sec: ((performance.now() - startTime) / 1000).toFixed(2)
-                        }, text);
+                        }, text, relevantChunks);
                     } else {
                         const errMsg = typeof data.error === "object" ? (data.error?.message || JSON.stringify(data.error)) : data.error;
                         appendErrorMessage(`Error (${response.status}): ${errMsg || (isLMStudio ? "Inference error from LM Studio." : "Inference error returned from Ollama.")}`);
@@ -1736,8 +2207,8 @@
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
-                            prompt: text,
-                            message: text,
+                            prompt: promptToSend,
+                            message: promptToSend,
                             provider: currentProvider,
                             model: currentModel || "openai/gpt-oss-120b"
                         })
@@ -1753,7 +2224,7 @@
                             model: data.model || currentModel || "openai/gpt-oss-120b",
                             reply: data.reply || "",
                             time_sec: data.time_sec !== undefined ? data.time_sec : elapsed
-                        }, text);
+                        }, text, relevantChunks);
                     } else {
                         // Shows the exact error message from the server instead of a generic error
                         const errMsg = typeof data.error === "object" ? (data.error?.message || JSON.stringify(data.error)) : data.error;
