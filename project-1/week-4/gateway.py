@@ -6,6 +6,7 @@ Description: Abstract ModelProvider interface with adapters for Groq (Cloud)
 """
 
 import os
+import sys
 import time
 import requests
 from abc import ABC, abstractmethod
@@ -19,6 +20,36 @@ parent_dir = os.path.dirname(current_dir)
 load_dotenv(os.path.join(current_dir, ".env"))
 load_dotenv(os.path.join(parent_dir, ".env"))
 load_dotenv(os.path.join(parent_dir, "week-2", ".env"))
+
+# Import Hardware Profiler from Project 2
+try:
+    project2_path = os.path.abspath(os.path.join(parent_dir, "..", "project-2"))
+    if project2_path not in sys.path and os.path.exists(project2_path):
+        sys.path.insert(0, project2_path)
+    from hardware_profiler import detect_hardware
+except Exception:
+    def detect_hardware():
+        import psutil
+        import platform
+        return {
+            "os": f"{platform.system()} {platform.release()} ({platform.architecture()[0]})",
+            "cpu": {
+                "name": platform.processor() or "Unknown CPU",
+                "physical_cores": psutil.cpu_count(logical=False) or 4,
+                "logical_cores": psutil.cpu_count(logical=True) or 8,
+            },
+            "ram": {
+                "total_gb": round(psutil.virtual_memory().total / (1024 ** 3), 2),
+                "available_gb": round(psutil.virtual_memory().available / (1024 ** 3), 2),
+                "used_gb": round(psutil.virtual_memory().used / (1024 ** 3), 2),
+                "percent_used": psutil.virtual_memory().percent
+            },
+            "disk": {
+                "free_gb": round(psutil.disk_usage(".").free / (1024 ** 3), 2),
+                "total_gb": round(psutil.disk_usage(".").total / (1024 ** 3), 2)
+            },
+            "gpu": {"type": "CPU Only", "vram_gb": 0.0, "devices": []}
+        }
 
 
 # =====================================================================
@@ -77,7 +108,22 @@ class GroqProvider(ModelProvider):
                 timeout=5
             )
             if r.status_code == 200:
-                return [m["id"] for m in r.json().get("data", []) if "whisper" not in m["id"]]
+                raw_ids = [m["id"] for m in r.json().get("data", [])]
+                # Keep only active conversational chat LLMs; exclude classifiers, audio/TTS, and guardrail models
+                excluded_patterns = ["whisper", "prompt-guard", "guard", "orpheus", "canopylabs", "embed", "vision"]
+                valid = [m for m in raw_ids if not any(k in m.lower() for k in excluded_patterns)]
+
+                priority_order = [
+                    "openai/gpt-oss-120b",
+                    "openai/gpt-oss-20b",
+                    "qwen/qwen3.8-27b",
+                    "allam-2-7b"
+                ]
+                sorted_models = [m for m in priority_order if m in valid]
+                for m in valid:
+                    if m not in sorted_models:
+                        sorted_models.append(m)
+                return sorted_models if sorted_models else [self.default_model]
         except Exception:
             pass
         return [self.default_model]
@@ -131,7 +177,7 @@ class OllamaProvider(ModelProvider):
                 return [m["name"] for m in r.json().get("models", [])]
         except Exception:
             pass
-        return [self.default_model]
+        return []
 
     def generate(self, prompt: str, model: str = None) -> dict:
         chosen_model = model or self.default_model
@@ -197,6 +243,15 @@ def dashboard():
 @app.route("/api/status", methods=["GET"])
 def get_status():
     return jsonify(gateway.get_system_status())
+
+
+@app.route("/api/hardware", methods=["GET"])
+def get_hardware():
+    try:
+        hw_profile = detect_hardware()
+        return jsonify(hw_profile), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/api/chat", methods=["POST"])

@@ -1,0 +1,82 @@
+{
+  "workspaces": {
+    "ws_hr": {
+      "workspace_id": "ws_hr",
+      "name": "HR Policy & Benefits Assistant",
+      "description": "Answers employee questions on stipends, working hours, and leave.",
+      "system_instructions": "You are the HR Policy Assistant.",
+      "approved_domains": [
+        "hr.acmecorp.internal",
+        "benefits.acmecorp.com"
+      ],
+      "model_provider": "local",
+      "documents": {
+        "doc_1794979305289_1": {
+          "doc_id": "doc_1794979305289_1",
+          "source": "sample_policy.txt",
+          "type": "TXT",
+          "chunks_count": 2,
+          "status": "INDEXED"
+        }
+      },
+      "chunks": [
+        {
+          "chunk_id": "doc_1794979305289_1_c1",
+          "doc_id": "doc_1794979305289_1",
+          "source": "sample_policy.txt",
+          "page": 1,
+          "content": "Acme Corp Remote Work and Equipment Policy (2026) Employees are eligible for a $500 home-office equipment stipend after 90 days of employment. Standard core working hours are 10:00 AM to 4:00 PM Eastern Time for cross-team coordination. All company devices must have full-disk encryption enabled and use 2-factor authentication. Annual travel budgets allow up to $1,500 per team member for the annual engineering offsite.",
+          "injection_sanitized": false
+        },
+        {
+          "chunk_id": "doc_1794979305289_1_c2",
+          "doc_id": "doc_1794979305289_1",
+          "source": "sample_policy.txt",
+          "page": 1,
+          "content": "eam member for the annual engineering offsite.",
+          "injection_sanitized": false
+        }
+      ],
+      "unanswered_questions": []
+    },
+    "ws_eng": {
+      "workspace_id": "ws_eng",
+      "name": "Engineering Architecture Assistant",
+      "description": "Internal deployment and security runbooks.",
+      "system_instructions": "You are the Engineering Runbook Assistant.",
+      "approved_domains": [
+        "docs.acmecorp.internal"
+      ],
+      "model_provider": "local",
+      "documents": {
+        "doc_1794979305329_1": {
+          "doc_id": "doc_1794979305329_1",
+          "source": "security_runbook.docx",
+          "type": "DOCX",
+          "chunks_count": 1,
+          "status": "INDEXED"
+        }
+      },
+      "chunks": [
+        {
+          "chunk_id": "doc_1794979305329_1_c1",
+          "doc_id": "doc_1794979305329_1",
+          "source": "security_runbook.docx",
+          "page": 1,
+          "content": "Production Deployment & API Key Policy All production database credentials must rotate every 30 days via HashiCorp Vault. [REDACTED_PROMPT_INJECTION] and [REDACTED_PROMPT_INJECTION].",
+          "injection_sanitized": true
+        }
+      ],
+      "unanswered_questions": []
+    }
+  },
+  "feedback": [
+    {
+      "timestamp": "2026-11-18T05:22:03Z",
+      "workspace_id": "ws_hr",
+      "question": "Stipend & parental leave query",
+      "rating": "accurate",
+      "comment": "Verified both sources."
+    }
+  ]
+}

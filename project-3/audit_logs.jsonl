@@ -1,0 +1,10 @@
+{"timestamp": "2026-11-18T05:21:45Z", "workspace_id": "ws_hr", "role": "admin", "action": "CREATE_ASSISTANT", "details": "Created assistant 'HR Policy & Benefits Assistant'"}
+{"timestamp": "2026-11-18T05:21:45Z", "workspace_id": "ws_eng", "role": "admin", "action": "CREATE_ASSISTANT", "details": "Created assistant 'Engineering Architecture Assistant'"}
+{"timestamp": "2026-11-18T05:21:45Z", "workspace_id": "ws_hr", "role": "admin", "action": "INGEST_FILE", "details": "Ingested sample_policy.txt (2 chunks)"}
+{"timestamp": "2026-11-18T05:21:45Z", "workspace_id": "ws_eng", "role": "admin", "action": "INGEST_FILE", "details": "Ingested security_runbook.docx (1 chunks)"}
+{"timestamp": "2026-11-18T05:21:45Z", "workspace_id": "ws_hr", "role": "admin", "action": "INGEST_URL", "details": "Crawled https://hr.acmecorp.internal/parental-leave (1 chunks)"}
+{"timestamp": "2026-11-18T05:21:45Z", "workspace_id": "ws_hr", "role": "admin", "action": "BLOCKED_URL_CRAWL", "details": "Blocked unapproved domain: untrusted-site.org"}
+{"timestamp": "2026-11-18T05:21:45Z", "workspace_id": "ws_eng", "role": "employee", "action": "UNAUTHORIZED_WORKSPACE_ACCESS", "details": "Blocked query: 'How often do keys rotate?'"}
+{"timestamp": "2026-11-18T05:22:03Z", "workspace_id": "ws_hr", "role": "employee", "action": "RAG_QUERY", "details": "Question answered with 2 citations"}
+{"timestamp": "2026-11-18T05:22:03Z", "workspace_id": "ws_hr", "role": "employee", "action": "USER_FEEDBACK", "details": "Rated 'accurate' on query"}
+{"timestamp": "2026-11-18T05:22:03Z", "workspace_id": "ws_hr", "role": "admin", "action": "DELETE_DOCUMENT", "details": "Deleted https://hr.acmecorp.internal/parental-leave and purged index chunks"}

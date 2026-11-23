@@ -63,19 +63,36 @@ def detect_gpu():
     except Exception:
         pass
 
-    # Windows WMIC fallback (checks for Intel/AMD/NVIDIA display adapters)
+    # Windows Display Adapter detection (Registry fallback + CIM)
     if platform.system() == "Windows":
         try:
-            wmic_out = subprocess.check_output(
-                ["powershell", "-Command", "Get-CimInstance Win32_VideoController | Select-Object -Property Name, AdapterRAM"],
-                encoding="utf-8"
+            reg_out = subprocess.check_output(
+                ["reg", "query", r"HKLM\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}", "/s", "/v", "DriverDesc"],
+                encoding="utf-8",
+                stderr=subprocess.DEVNULL
             )
-            for line in wmic_out.split("\n"):
-                if "NVIDIA" in line or "AMD" in line or "Radeon" in line or "Intel" in line:
-                    gpu_info["devices"].append({"name": line.strip(), "vram_gb": "Shared / System Managed"})
-                    gpu_info["type"] = "Integrated / Hybrid"
+            for line in reg_out.splitlines():
+                if "DriverDesc" in line and "REG_SZ" in line:
+                    gpu_name = line.split("REG_SZ")[-1].strip()
+                    if gpu_name and "Remote" not in gpu_name:
+                        gpu_info["devices"].append({"name": gpu_name, "vram_gb": 0.0})
+                        gpu_info["type"] = "Integrated / Hybrid"
         except Exception:
             pass
+
+        if not gpu_info["devices"]:
+            try:
+                wmic_out = subprocess.check_output(
+                    ["powershell", "-NoProfile", "-Command", "Get-CimInstance Win32_VideoController | Select-Object -Property Name, AdapterRAM"],
+                    encoding="utf-8",
+                    stderr=subprocess.DEVNULL
+                )
+                for line in wmic_out.split("\n"):
+                    if any(vendor in line for vendor in ["NVIDIA", "AMD", "Radeon", "Intel", "Iris", "GeForce"]):
+                        gpu_info["devices"].append({"name": line.strip(), "vram_gb": 0.0})
+                        gpu_info["type"] = "Integrated / Hybrid"
+            except Exception:
+                pass
 
     return gpu_info
 
